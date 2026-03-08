@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+app/node_modules/
+
+# Build output
+app/build/
+build/
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data (user-specific runtime data)
+.rdbms2marklogic/
+
+# Claude Code
+.claude/

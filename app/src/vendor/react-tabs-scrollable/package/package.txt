@@ -1,0 +1,67 @@
+{
+  "name": "react-tabs-scrollable",
+  "version": "2.0.6",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "prepack": "json -f package.json -I -e \"delete this.devDependencies; delete this.dependencies\""
+  },
+  "description": "a simple react scrollable tabs with a lot of additional features and with fully supporting of RTL mode",
+  "author": "Mohamad Aliwi",
+  "license": "MIT",
+  "repository": "Mohamad Aliwi/react-tabs-scrollable",
+  "keywords": [
+    "react",
+    "react-tabs",
+    "tabs",
+    "scrollable",
+    "rtl",
+    "menu",
+    "tab",
+    "scroll",
+    "navigation"
+  ],
+  "homepage": "https://github.com/Mood-al/react-tabs-scrollable#readme",
+  "bugs": {
+    "url": "https://github.com/Mood-al/react-tabs-scrollable/issues",
+    "email": "aliwi299@gmail.com"
+  },
+  "funding": "https://www.buymeacoffee.com/Mooder",
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0",
+    "vite-plugin-dts": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^8.50.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^4.0.0",
+    "vitest": "^0.34.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/react-tabs-scrollable.umd.js",
+  "module": "./dist/react-tabs-scrollable.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/react-tabs-scrollable.es.js",
+      "require": "./dist/react-tabs-scrollable.umd.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/rts.css": {
+      "import": "./dist/rts.css",
+      "require": "./dist/rts.css"
+    }
+  }
+}

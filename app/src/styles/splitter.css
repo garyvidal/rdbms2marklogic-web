@@ -1,0 +1,19 @@
+.drag-bar {
+    flex-shrink: 0;
+    width: 5px;
+    background-color: slategray;
+    cursor: col-resize;
+    transition: background-color 0.15s 0.15s ease-in-out;
+  }
+  
+  .drag-bar.drag-bar--dragging,
+  .drag-bar:hover{
+    background-color: slategrey;
+  }
+  
+  .drag-bar.drag-bar--horizontal {
+    height: 5px;
+    width: 100%;
+    cursor: row-resize;
+  }
+  

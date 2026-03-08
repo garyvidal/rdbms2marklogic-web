@@ -1,0 +1,121 @@
+"use client";
+
+import { useState, useRef, useCallback } from "react";
+import '@xyflow/react/dist/style.css';
+import '@/styles/schema-view.css';
+import '@/styles/splitter.css';
+
+import SchemaView from "./components/SchemaView/SchemaView";
+import Header from "./components/Header";
+import CreateProjectWizard from "./components/CreateProjectWizard";
+import OpenProjectModal from "./components/OpenProjectModal";
+import { ProjectData, DiagramContainer, getProject, saveProject } from "./services/projectService";
+import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
+
+export default function App() {
+  const [showWizard, setShowWizard] = useState(false);
+  const [showOpenModal, setShowOpenModal] = useState(true);
+  const [openProjects, setOpenProjects] = useState<ProjectData[]>([]);
+  const [activeProjectName, setActiveProjectName] = useState<string | null>(null);
+  const openProjectsRef = useRef<ProjectData[]>([]);
+  openProjectsRef.current = openProjects;
+
+  const openProject = (project: ProjectData) => {
+    setOpenProjects((prev) => {
+      const without = prev.filter((p) => p.name !== project.name);
+      return [...without, project];
+    });
+    setActiveProjectName(project.name);
+    setShowOpenModal(false);
+  };
+
+  const handleProjectSaved = async (projectName: string) => {
+    setShowWizard(false);
+    try {
+      const project = await getProject(projectName);
+      openProject(project);
+    } catch (e) {
+      console.error('Failed to load saved project:', e);
+    }
+  };
+
+  const handleProjectSelect = (name: string) => {
+    setActiveProjectName(name);
+  };
+
+  const handleProjectClose = (name: string) => {
+    setOpenProjects((prev) => {
+      const next = prev.filter((p) => p.name !== name);
+      if (activeProjectName === name) {
+        setActiveProjectName(next.length > 0 ? next[next.length - 1].name : null);
+      }
+      return next;
+    });
+  };
+
+  const handleDiagramChange = useCallback((projectName: string, reactNodes: ReactFlowNode[], reactEdges: ReactFlowEdge[]) => {
+    const project = openProjectsRef.current.find((p) => p.name === projectName);
+    if (!project) return;
+
+    const diagram: DiagramContainer = {
+      name: projectName,
+      tabs: [{
+        id: 'relational',
+        name: 'Relational',
+        relational: {
+          nodes: reactNodes.map((n) => ({
+            id: n.id,
+            type: 'CARD',
+            x: Math.round(n.position.x),
+            y: Math.round(n.position.y),
+            width: (n as any).measured?.width ?? 300,
+            height: (n as any).measured?.height ?? 200,
+            collapsed: false,
+          })),
+          edges: reactEdges.map((e) => ({
+            id: e.id,
+            source: e.source,
+            target: e.target,
+            startMarker: null,
+            endMarker: null,
+          })),
+        },
+        document: null,
+      }],
+    };
+
+    const updatedProject: ProjectData = { ...project, diagrams: [diagram] };
+    setOpenProjects((prev) => prev.map((p) => p.name === projectName ? updatedProject : p));
+    saveProject(updatedProject).catch((e) => console.error('Failed to save diagram:', e));
+  }, []);
+
+  return (
+    <div className="App flex flex-column h-screen bg-slate-800 font-mono color-white overflow-hidden">
+      <Header
+        onNewProject={() => setShowWizard(true)}
+        onOpenProject={() => setShowOpenModal(true)}
+      />
+      <SchemaView
+        openProjects={openProjects}
+        activeProjectName={activeProjectName}
+        onProjectSelect={handleProjectSelect}
+        onProjectClose={handleProjectClose}
+        onDiagramChange={handleDiagramChange}
+      />
+      {showWizard && (
+        <CreateProjectWizard
+          onClose={() => setShowWizard(false)}
+          onSaved={handleProjectSaved}
+        />
+      )}
+      {showOpenModal && (
+        <OpenProjectModal
+          onOpen={openProject}
+          onClose={() => setShowOpenModal(false)}
+          onDeleted={handleProjectClose}
+          alreadyOpenNames={openProjects.map((p) => p.name)}
+        />
+      )}
+    </div>
+  );
+}

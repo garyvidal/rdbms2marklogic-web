@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install @dagrejs/dagre --save)",
+      "Bash(node -e \"const d = require\\(''c:/Users/garyv/Workspace/rdbms2marklogic_web/app/node_modules/@dagrejs/dagre''\\); console.log\\(Object.keys\\(d\\)\\)\")",
+      "Bash(python -m json.tool)",
+      "Bash(git config --global user.name)",
+      "Bash(git config --global user.email)",
+      "Bash(git config --global user.name \"garyvidal\")",
+      "Bash(git config --global user.email \"gvidalsassoon@gmail.com\")",
+      "Bash(\"c:/Users/garyv/IdeaProjects/RdmsToMarkLogic/.gitignore\":*)",
+      "Bash(\"c:/Users/garyv/Workspace/rdbms2marklogic_web/.gitignore\")",
+      "Bash(git -C \"c:/Users/garyv/Workspace/rdbms2marklogic_web\" rm --cached .claude/settings.local.json)"
+    ]
+  }
+}

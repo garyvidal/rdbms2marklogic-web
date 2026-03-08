@@ -1,0 +1,1520 @@
+{
+    "name": "My Test Project",
+    "version": "1.0",
+    "connectionName": "Northwind",
+    "created": "2026-03-08T17:25:32.3400997Z",
+    "modified": "2026-03-08T17:59:21.447557Z",
+    "schemas": {
+        "public": {
+            "name": "public",
+            "tables": {
+                "categories": {
+                    "tableName": "categories",
+                    "schema": "public",
+                    "columns": {
+                        "category_id": {
+                            "name": "category_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "category_name": {
+                            "name": "category_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "description": {
+                            "name": "description",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "text",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "picture": {
+                            "name": "picture",
+                            "type": "BINARY",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "bytea",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "products",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "customer_customer_demo": {
+                    "tableName": "customer_customer_demo",
+                    "schema": "public",
+                    "columns": {
+                        "customer_id": {
+                            "name": "customer_id",
+                            "type": "VARCHAR",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "customer_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "customer_type_id": {
+                            "name": "customer_type_id",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "customer_type_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": []
+                },
+                "customer_demographics": {
+                    "tableName": "customer_demographics",
+                    "schema": "public",
+                    "columns": {
+                        "customer_type_id": {
+                            "name": "customer_type_id",
+                            "type": "VARCHAR",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "customer_desc": {
+                            "name": "customer_desc",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "text",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "customer_customer_demo",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "customers": {
+                    "tableName": "customers",
+                    "schema": "public",
+                    "columns": {
+                        "customer_id": {
+                            "name": "customer_id",
+                            "type": "VARCHAR",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "company_name": {
+                            "name": "company_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "contact_name": {
+                            "name": "contact_name",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "contact_title": {
+                            "name": "contact_title",
+                            "type": "VARCHAR",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "address": {
+                            "name": "address",
+                            "type": "VARCHAR",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "city": {
+                            "name": "city",
+                            "type": "VARCHAR",
+                            "position": 6,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "region": {
+                            "name": "region",
+                            "type": "VARCHAR",
+                            "position": 7,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "postal_code": {
+                            "name": "postal_code",
+                            "type": "VARCHAR",
+                            "position": 8,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "country": {
+                            "name": "country",
+                            "type": "VARCHAR",
+                            "position": 9,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "phone": {
+                            "name": "phone",
+                            "type": "VARCHAR",
+                            "position": 10,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "fax": {
+                            "name": "fax",
+                            "type": "VARCHAR",
+                            "position": 11,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "customer_customer_demo",
+                            "toColumn": null,
+                            "relationshipType": null
+                        },
+                        {
+                            "toTable": "orders",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "employee_territories": {
+                    "tableName": "employee_territories",
+                    "schema": "public",
+                    "columns": {
+                        "employee_id": {
+                            "name": "employee_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "employee_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "territory_id": {
+                            "name": "territory_id",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "territory_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": []
+                },
+                "employees": {
+                    "tableName": "employees",
+                    "schema": "public",
+                    "columns": {
+                        "employee_id": {
+                            "name": "employee_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "last_name": {
+                            "name": "last_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "first_name": {
+                            "name": "first_name",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "title": {
+                            "name": "title",
+                            "type": "VARCHAR",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "title_of_courtesy": {
+                            "name": "title_of_courtesy",
+                            "type": "VARCHAR",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "birth_date": {
+                            "name": "birth_date",
+                            "type": "DATE",
+                            "position": 6,
+                            "columnType": {
+                                "columnType": "date",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "hire_date": {
+                            "name": "hire_date",
+                            "type": "DATE",
+                            "position": 7,
+                            "columnType": {
+                                "columnType": "date",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "address": {
+                            "name": "address",
+                            "type": "VARCHAR",
+                            "position": 8,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "city": {
+                            "name": "city",
+                            "type": "VARCHAR",
+                            "position": 9,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "region": {
+                            "name": "region",
+                            "type": "VARCHAR",
+                            "position": 10,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "postal_code": {
+                            "name": "postal_code",
+                            "type": "VARCHAR",
+                            "position": 11,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "country": {
+                            "name": "country",
+                            "type": "VARCHAR",
+                            "position": 12,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "home_phone": {
+                            "name": "home_phone",
+                            "type": "VARCHAR",
+                            "position": 13,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "extension": {
+                            "name": "extension",
+                            "type": "VARCHAR",
+                            "position": 14,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "photo": {
+                            "name": "photo",
+                            "type": "BINARY",
+                            "position": 15,
+                            "columnType": {
+                                "columnType": "bytea",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "notes": {
+                            "name": "notes",
+                            "type": "VARCHAR",
+                            "position": 16,
+                            "columnType": {
+                                "columnType": "text",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "reports_to": {
+                            "name": "reports_to",
+                            "type": "SMALLINT",
+                            "position": 17,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "employee_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "photo_path": {
+                            "name": "photo_path",
+                            "type": "VARCHAR",
+                            "position": 18,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "employee_territories",
+                            "toColumn": null,
+                            "relationshipType": null
+                        },
+                        {
+                            "toTable": "employees",
+                            "toColumn": null,
+                            "relationshipType": null
+                        },
+                        {
+                            "toTable": "orders",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "order_details": {
+                    "tableName": "order_details",
+                    "schema": "public",
+                    "columns": {
+                        "order_id": {
+                            "name": "order_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "order_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "product_id": {
+                            "name": "product_id",
+                            "type": "SMALLINT",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "product_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "unit_price": {
+                            "name": "unit_price",
+                            "type": "REAL",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "float4",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "quantity": {
+                            "name": "quantity",
+                            "type": "SMALLINT",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "discount": {
+                            "name": "discount",
+                            "type": "REAL",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "float4",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": []
+                },
+                "orders": {
+                    "tableName": "orders",
+                    "schema": "public",
+                    "columns": {
+                        "order_id": {
+                            "name": "order_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "customer_id": {
+                            "name": "customer_id",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "customer_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "employee_id": {
+                            "name": "employee_id",
+                            "type": "SMALLINT",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "employee_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "order_date": {
+                            "name": "order_date",
+                            "type": "DATE",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "date",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "required_date": {
+                            "name": "required_date",
+                            "type": "DATE",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "date",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "shipped_date": {
+                            "name": "shipped_date",
+                            "type": "DATE",
+                            "position": 6,
+                            "columnType": {
+                                "columnType": "date",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_via": {
+                            "name": "ship_via",
+                            "type": "SMALLINT",
+                            "position": 7,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "shipper_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "freight": {
+                            "name": "freight",
+                            "type": "REAL",
+                            "position": 8,
+                            "columnType": {
+                                "columnType": "float4",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_name": {
+                            "name": "ship_name",
+                            "type": "VARCHAR",
+                            "position": 9,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_address": {
+                            "name": "ship_address",
+                            "type": "VARCHAR",
+                            "position": 10,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_city": {
+                            "name": "ship_city",
+                            "type": "VARCHAR",
+                            "position": 11,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_region": {
+                            "name": "ship_region",
+                            "type": "VARCHAR",
+                            "position": 12,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_postal_code": {
+                            "name": "ship_postal_code",
+                            "type": "VARCHAR",
+                            "position": 13,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "ship_country": {
+                            "name": "ship_country",
+                            "type": "VARCHAR",
+                            "position": 14,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "order_details",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "products": {
+                    "tableName": "products",
+                    "schema": "public",
+                    "columns": {
+                        "product_id": {
+                            "name": "product_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "product_name": {
+                            "name": "product_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "supplier_id": {
+                            "name": "supplier_id",
+                            "type": "SMALLINT",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "supplier_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "category_id": {
+                            "name": "category_id",
+                            "type": "SMALLINT",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "category_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "quantity_per_unit": {
+                            "name": "quantity_per_unit",
+                            "type": "VARCHAR",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "unit_price": {
+                            "name": "unit_price",
+                            "type": "REAL",
+                            "position": 6,
+                            "columnType": {
+                                "columnType": "float4",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "units_in_stock": {
+                            "name": "units_in_stock",
+                            "type": "SMALLINT",
+                            "position": 7,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "units_on_order": {
+                            "name": "units_on_order",
+                            "type": "SMALLINT",
+                            "position": 8,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "reorder_level": {
+                            "name": "reorder_level",
+                            "type": "SMALLINT",
+                            "position": 9,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "discontinued": {
+                            "name": "discontinued",
+                            "type": "INTEGER",
+                            "position": 10,
+                            "columnType": {
+                                "columnType": "int4",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "order_details",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "region": {
+                    "tableName": "region",
+                    "schema": "public",
+                    "columns": {
+                        "region_id": {
+                            "name": "region_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "region_description": {
+                            "name": "region_description",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "territories",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "shippers": {
+                    "tableName": "shippers",
+                    "schema": "public",
+                    "columns": {
+                        "shipper_id": {
+                            "name": "shipper_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "company_name": {
+                            "name": "company_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "phone": {
+                            "name": "phone",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "orders",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "suppliers": {
+                    "tableName": "suppliers",
+                    "schema": "public",
+                    "columns": {
+                        "supplier_id": {
+                            "name": "supplier_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "company_name": {
+                            "name": "company_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "contact_name": {
+                            "name": "contact_name",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "contact_title": {
+                            "name": "contact_title",
+                            "type": "VARCHAR",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "address": {
+                            "name": "address",
+                            "type": "VARCHAR",
+                            "position": 5,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "city": {
+                            "name": "city",
+                            "type": "VARCHAR",
+                            "position": 6,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "region": {
+                            "name": "region",
+                            "type": "VARCHAR",
+                            "position": 7,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "postal_code": {
+                            "name": "postal_code",
+                            "type": "VARCHAR",
+                            "position": 8,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "country": {
+                            "name": "country",
+                            "type": "VARCHAR",
+                            "position": 9,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "phone": {
+                            "name": "phone",
+                            "type": "VARCHAR",
+                            "position": 10,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "fax": {
+                            "name": "fax",
+                            "type": "VARCHAR",
+                            "position": 11,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "homepage": {
+                            "name": "homepage",
+                            "type": "VARCHAR",
+                            "position": 12,
+                            "columnType": {
+                                "columnType": "text",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "products",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "territories": {
+                    "tableName": "territories",
+                    "schema": "public",
+                    "columns": {
+                        "territory_id": {
+                            "name": "territory_id",
+                            "type": "VARCHAR",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "territory_description": {
+                            "name": "territory_description",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "region_id": {
+                            "name": "region_id",
+                            "type": "SMALLINT",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": {
+                                "name": "region_id",
+                                "table": null,
+                                "column": null,
+                                "cardinality": null,
+                                "synthetic": null
+                            },
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": [
+                        {
+                            "toTable": "employee_territories",
+                            "toColumn": null,
+                            "relationshipType": null
+                        }
+                    ]
+                },
+                "us_states": {
+                    "tableName": "us_states",
+                    "schema": "public",
+                    "columns": {
+                        "state_id": {
+                            "name": "state_id",
+                            "type": "SMALLINT",
+                            "position": 1,
+                            "columnType": {
+                                "columnType": "int2",
+                                "precision": 0,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": true,
+                            "sequence": false
+                        },
+                        "state_name": {
+                            "name": "state_name",
+                            "type": "VARCHAR",
+                            "position": 2,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "state_abbr": {
+                            "name": "state_abbr",
+                            "type": "VARCHAR",
+                            "position": 3,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        },
+                        "state_region": {
+                            "name": "state_region",
+                            "type": "VARCHAR",
+                            "position": 4,
+                            "columnType": {
+                                "columnType": "varchar",
+                                "precision": 10485760,
+                                "scale": 0
+                            },
+                            "foreignKey": null,
+                            "primaryKey": false,
+                            "sequence": false
+                        }
+                    },
+                    "relationships": []
+                }
+            }
+        }
+    },
+    "mappings": null,
+    "diagrams": [
+        {
+            "name": "My Test Project",
+            "tabs": [
+                {
+                    "id": "relational",
+                    "name": "Relational",
+                    "relational": {
+                        "nodes": [
+                            {
+                                "id": "public.categories",
+                                "type": "databaseSchema",
+                                "x": 50,
+                                "y": 50
+                            },
+                            {
+                                "id": "public.customer_demographics",
+                                "type": "databaseSchema",
+                                "x": 430,
+                                "y": 50
+                            },
+                            {
+                                "id": "public.customer_customer_demo",
+                                "type": "databaseSchema",
+                                "x": 810,
+                                "y": 50
+                            },
+                            {
+                                "id": "public.products",
+                                "type": "databaseSchema",
+                                "x": 1190,
+                                "y": 50
+                            },
+                            {
+                                "id": "public.suppliers",
+                                "type": "databaseSchema",
+                                "x": 50,
+                                "y": 330
+                            },
+                            {
+                                "id": "public.territories",
+                                "type": "databaseSchema",
+                                "x": 314.6987571701721,
+                                "y": 191.78173996175903
+                            },
+                            {
+                                "id": "public.us_states",
+                                "type": "databaseSchema",
+                                "x": 810,
+                                "y": 330
+                            }
+                        ],
+                        "edges": []
+                    }
+                }
+            ]
+        }
+    ]
+}
