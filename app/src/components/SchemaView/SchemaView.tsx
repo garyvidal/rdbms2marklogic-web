@@ -478,10 +478,10 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const leftPanelBody = activeProject
         ? <ProjectPanel
             project={activeProject}
-            onTableSelect={viewMode === 'relational' ? handleProjectTableSelect : undefined}
-            onTableMappingRequest={viewMode === 'document' ? (t: string, s: string) => setPendingMappingTable({ tableName: t, schemaName: s }) : undefined}
-            visibleNodeIds={viewMode === 'relational' ? visibleNodeIds : undefined}
-            onAddTables={viewMode === 'relational' ? () => setShowAddTablesModal(true) : undefined}
+            onTableSelect={handleProjectTableSelect}
+            onTableMappingRequest={(t: string, s: string) => setPendingMappingTable({ tableName: t, schemaName: s })}
+            visibleNodeIds={visibleNodeIds}
+            onAddTables={() => setShowAddTablesModal(true)}
             mappedTableKeys={mappedTableKeys.size > 0 ? mappedTableKeys : undefined}
           />
         : <SchemasPanel
@@ -581,7 +581,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                         className={cn("shrink-0 contents-top max-w-md", isPluginDragging && "dragging")}
                         style={{ width: pluginW }}
                     >
-                        {viewMode === 'document' && activeProject ? (
+                        {activeProject ? (
                             <DocumentModelView
                                 project={activeProject}
                                 pendingTable={pendingMappingTable}

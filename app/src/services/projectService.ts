@@ -73,26 +73,34 @@ export type XmlSchemaType =
   | 'xs:dateTime'
   | 'xs:boolean';
 
-export type TableMappingType = 'RootElement' | 'Elements';
-export type ColumnMappingType = 'Element' | 'ElementAttribute';
+export type TableMappingType = 'RootElement' | 'Elements' | 'InlineElement' | 'CUSTOM';
+export type ColumnMappingType = 'Element' | 'ElementAttribute' | 'CUSTOM';
 
 export interface XmlColumnMapping {
   sourceColumn: string;
   xmlName: string;
   xmlType: XmlSchemaType;
   mappingType: ColumnMappingType;
+  /** Custom fields only: JavaScript function body that computes this field's value. */
+  customFunction?: string;
 }
 
 export interface XmlTableMapping {
   sourceSchema: string;
   sourceTable: string;
-  /** RootElement: the root element name. Elements: the child element name that directly contains the columns. */
+  /** RootElement: the root element name. Elements/InlineElement: the child element name. CUSTOM: the output element name. */
   xmlName: string;
   mappingType: TableMappingType;
   /** Elements only: when true, columns are nested inside a wrapper element around the child element. */
   wrapInParent: boolean;
   /** Elements only: outer wrapper element name, used when wrapInParent is true. */
   wrapperElementName?: string;
+  /** InlineElement: xmlName of the parent root/element this is nested inside. */
+  parentRef?: string;
+  /** CUSTOM: JavaScript function body that computes the element value from referenced fields. */
+  customFunction?: string;
+  /** CUSTOM: the XSD type returned by the custom function. */
+  xmlType?: XmlSchemaType;
   columns: XmlColumnMapping[];
 }
 
