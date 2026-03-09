@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import { ProjectData } from '@/services/projectService';
-import { FaChevronDown, FaChevronRight, FaTable, FaFolder, FaEye, FaPlus } from 'react-icons/fa';
+import { FaChevronDown, FaChevronRight, FaTable, FaFolder, FaEye, FaPlus, FaCheck } from 'react-icons/fa';
 
 interface ProjectPanelProps {
   project: ProjectData;
   onTableSelect?: (tableName: string, schemaName: string) => void;
   visibleNodeIds?: Set<string>;
   onAddTables?: () => void;
+  /** When provided, clicking a table calls this instead of onTableSelect (used in Document Model view). */
+  onTableMappingRequest?: (tableName: string, schemaName: string) => void;
+  /** Keys of tables that already have a document model mapping ("schema.table"). */
+  mappedTableKeys?: Set<string>;
 }
 
-const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, visibleNodeIds, onAddTables }) => {
+const ProjectPanel: React.FC<ProjectPanelProps> = ({
+  project,
+  onTableSelect,
+  visibleNodeIds,
+  onAddTables,
+  onTableMappingRequest,
+  mappedTableKeys,
+}) => {
   const schemas = Object.entries(project.schemas);
   const [expandedSchemas, setExpandedSchemas] = useState<Set<string>>(
     new Set(schemas.map(([key]) => key))
@@ -30,6 +41,17 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
     0
   );
 
+  const handleTableClick = (tableName: string, schemaKey: string, key: string) => {
+    setSelectedTable(key);
+    if (onTableMappingRequest) {
+      onTableMappingRequest(tableName, schemaKey);
+    } else {
+      onTableSelect?.(tableName, schemaKey);
+    }
+  };
+
+  const isMappingMode = !!onTableMappingRequest;
+
   return (
     <div className="flex flex-col h-full w-full bg-slate-700 text-white overflow-hidden">
       <div className="flex-shrink-0 px-3 py-2 border-b border-slate-600">
@@ -37,16 +59,21 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
           <div className="text-xs font-medium text-gray-400">
             {schemas.length} schema{schemas.length !== 1 ? 's' : ''} &bull; {totalTables} table{totalTables !== 1 ? 's' : ''}
           </div>
-          <button
-            onClick={onAddTables}
-            title="Add tables to project"
-            className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded transition"
-          >
-            <FaPlus size={9} /> Add
-          </button>
+          {!isMappingMode && (
+            <button
+              onClick={onAddTables}
+              title="Add tables to project"
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded transition"
+            >
+              <FaPlus size={9} /> Add
+            </button>
+          )}
         </div>
         <div className="text-xs text-gray-500 mt-0.5 truncate">
-          Connection: {project.connectionName}
+          {isMappingMode
+            ? <span className="text-cyan-500">Click a table to map it</span>
+            : `Connection: ${project.connectionName}`
+          }
         </div>
       </div>
 
@@ -54,6 +81,9 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
         {schemas.map(([schemaKey, schema]) => {
           const tables = Object.values(schema.tables ?? {});
           const isExpanded = expandedSchemas.has(schemaKey);
+          const mappedInSchema = mappedTableKeys
+            ? tables.filter(t => mappedTableKeys.has(`${schemaKey}.${t.tableName}`)).length
+            : 0;
 
           return (
             <div key={schemaKey}>
@@ -67,6 +97,14 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
                 <FaFolder className="text-yellow-500 shrink-0" size={13} />
                 <span className="text-sm font-medium truncate">{schema.name || schemaKey}</span>
                 <span className="text-xs text-gray-400 ml-auto">{tables.length}</span>
+                {mappedInSchema > 0 && (
+                  <span
+                    className="ml-1 text-xs text-cyan-400 font-medium shrink-0"
+                    title={`${mappedInSchema} table${mappedInSchema !== 1 ? 's' : ''} mapped`}
+                  >
+                    {mappedInSchema}✓
+                  </span>
+                )}
               </button>
 
               {isExpanded && (
@@ -76,22 +114,32 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
                   ) : (
                     tables.map((table) => {
                       const key = `${schemaKey}.${table.tableName}`;
+                      const isMapped = mappedTableKeys?.has(key) ?? false;
                       return (
                         <button
                           key={key}
-                          onClick={() => {
-                            setSelectedTable(key);
-                            onTableSelect?.(table.tableName, schemaKey);
-                          }}
+                          onClick={() => handleTableClick(table.tableName, schemaKey, key)}
                           className={`w-full flex items-center gap-2 px-8 py-2 text-left hover:bg-slate-600 transition text-sm ${
                             selectedTable === key ? 'bg-slate-500' : ''
                           }`}
                         >
-                          <FaTable className="text-green-400 shrink-0" size={11} />
-                          <span className="truncate">{table.tableName}</span>
-                          {visibleNodeIds?.has(key) && (
-                            <FaEye className="text-cyan-400 shrink-0 ml-auto" size={11} title="Visible in diagram" />
-                          )}
+                          <FaTable
+                            className={`shrink-0 ${isMappingMode ? 'text-cyan-400' : isMapped ? 'text-cyan-500' : 'text-green-400'}`}
+                            size={11}
+                          />
+                          <span className={`truncate ${isMapped ? 'text-cyan-200' : ''}`}>{table.tableName}</span>
+                          <span className="ml-auto flex items-center gap-1.5 shrink-0">
+                            {isMapped && (
+                              <FaCheck
+                                className="text-cyan-400"
+                                size={10}
+                                title="Mapped to document model"
+                              />
+                            )}
+                            {!isMappingMode && visibleNodeIds?.has(key) && (
+                              <FaEye className="text-gray-400" size={11} title="Visible in diagram" />
+                            )}
+                          </span>
                         </button>
                       );
                     })

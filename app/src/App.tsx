@@ -106,6 +106,7 @@ export default function App() {
         onProjectClose={handleProjectClose}
         onDiagramChange={handleDiagramChange}
         onProjectSchemasUpdated={handleProjectSchemasUpdated}
+        onProjectSettingsUpdated={handleProjectSchemasUpdated}
       />
       {showWizard && (
         <CreateProjectWizard

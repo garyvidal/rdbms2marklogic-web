@@ -1,5 +1,14 @@
 const SCHEMA_SERVICE_URL = 'http://localhost:9390';
 
+/** Naming case options matching Java NamingCase enum (serialized as uppercase). */
+export type NamingCase = 'SNAKE' | 'CAMEL' | 'PASCAL' | 'DASH';
+
+export interface ProjectSettings {
+  defaultCasing?: NamingCase;
+  /** Connection line type matching @xyflow/react ConnectionLineType values. */
+  connectionLineType?: string;
+}
+
 export interface ProjectTable {
   tableName: string;
   schema?: string;
@@ -56,6 +65,44 @@ export interface DiagramContainer {
   tabs: DiagramTab[];
 }
 
+export type XmlSchemaType =
+  | 'xs:string'
+  | 'xs:integer'
+  | 'xs:long'
+  | 'xs:date'
+  | 'xs:dateTime'
+  | 'xs:boolean';
+
+export type TableMappingType = 'RootElement' | 'Elements';
+export type ColumnMappingType = 'Element' | 'ElementAttribute';
+
+export interface XmlColumnMapping {
+  sourceColumn: string;
+  xmlName: string;
+  xmlType: XmlSchemaType;
+  mappingType: ColumnMappingType;
+}
+
+export interface XmlTableMapping {
+  sourceSchema: string;
+  sourceTable: string;
+  /** RootElement: the root element name. Elements: the child element name that directly contains the columns. */
+  xmlName: string;
+  mappingType: TableMappingType;
+  /** Elements only: when true, columns are nested inside a wrapper element around the child element. */
+  wrapInParent: boolean;
+  /** Elements only: outer wrapper element name, used when wrapInParent is true. */
+  wrapperElementName?: string;
+  columns: XmlColumnMapping[];
+}
+
+export interface ProjectMapping {
+  documentModel: {
+    root?: XmlTableMapping;
+    elements: XmlTableMapping[];
+  };
+}
+
 export interface ProjectData {
   name: string;
   version?: string;
@@ -64,6 +111,8 @@ export interface ProjectData {
   modified?: string;
   schemas: Record<string, ProjectSchema>;
   diagrams?: DiagramContainer[] | null;
+  settings?: ProjectSettings;
+  mapping?: ProjectMapping;
 }
 
 export const saveProject = async (project: ProjectData): Promise<ProjectData> => {

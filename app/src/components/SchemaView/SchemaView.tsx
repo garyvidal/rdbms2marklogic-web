@@ -6,14 +6,17 @@ import Splitter from "../splitter";
 import { useResizable } from "react-resizable-layout";
 import { cn } from "@/lib/utils";
 import CollapsiblePanel from "../CollapsiblePanel";
-import SchemaToolbar from "./SchemaToolbar";
+import SchemaToolbar, { ViewMode } from "./SchemaToolbar";
 import DiagramTabs from "./DiagramTabs";
+import DocumentModelView from "../DocumentModelView/DocumentModelView";
 import SchemasPanel from "../SchemasPanel";
 import ProjectPanel from "../ProjectPanel";
 import AddTablesModal from "../AddTablesModal";
 import DatabaseConnectionForm from "../DatabaseConnectionForm";
+import { ConfigDialog } from "../ConfigDialog";
 import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, getConnection } from "@/services/schemaService";
-import { ProjectData, saveProject } from "@/services/projectService";
+import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, saveProject } from "@/services/projectService";
+import { convertCaseFromSetting } from "@/lib/caseConverter";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 import { DatabaseSchemaNode } from "../DatabaseSchemaNode";
 import { LayoutAlgorithm } from "./LayoutControls";
@@ -126,6 +129,24 @@ function LayoutApplier({ pendingLayout, edges, setNodes, setEdges, onDone }: Lay
     return null;
 }
 
+/** Rebuild all xmlName fields in a mapping using a new project naming case. */
+function remapAllNames(mapping: ProjectMapping, newCasing: string): ProjectMapping {
+    const remapTable = (t: XmlTableMapping): XmlTableMapping => ({
+        ...t,
+        xmlName: convertCaseFromSetting(t.sourceTable, newCasing),
+        columns: t.columns.map(col => ({
+            ...col,
+            xmlName: convertCaseFromSetting(col.sourceColumn, newCasing),
+        })),
+    });
+    return {
+        documentModel: {
+            root: mapping.documentModel.root ? remapTable(mapping.documentModel.root) : undefined,
+            elements: mapping.documentModel.elements.map(remapTable),
+        },
+    };
+}
+
 interface SchemaViewProps {
     openProjects: ProjectData[];
     activeProjectName: string | null;
@@ -133,9 +154,10 @@ interface SchemaViewProps {
     onProjectClose: (name: string) => void;
     onDiagramChange?: (projectName: string, nodes: ReactFlowNode[], edges: ReactFlowEdge[]) => void;
     onProjectSchemasUpdated?: (project: ProjectData) => void;
+    onProjectSettingsUpdated?: (project: ProjectData) => void;
 }
 
-const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjectClose, onDiagramChange, onProjectSchemasUpdated }: SchemaViewProps): JSX.Element => {
+const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjectClose, onDiagramChange, onProjectSchemasUpdated, onProjectSettingsUpdated }: SchemaViewProps): JSX.Element => {
     const [selectedTable, setSelectedTable] = useState<DbTable | null>(null);
     const [selectedSchema, setSelectedSchema] = useState<DbSchema | null>(null);
     const [database, setDatabase] = useState<DbDatabase | null>(null);
@@ -147,6 +169,13 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const [pendingLayout, setPendingLayout] = useState<LayoutAlgorithm | null>(null);
     const [contextMenu, setContextMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null);
     const [showAddTablesModal, setShowAddTablesModal] = useState(false);
+    const [showConfigDialog, setShowConfigDialog] = useState(false);
+    const [pendingCasingUpdate, setPendingCasingUpdate] = useState<{
+        settings: ProjectSettings;
+        lineType: ConnectionLineType;
+    } | null>(null);
+    const [viewMode, setViewMode] = useState<ViewMode>('relational');
+    const [pendingMappingTable, setPendingMappingTable] = useState<{ tableName: string; schemaName: string } | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -157,9 +186,22 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
     const activeProject = openProjects.find((p) => p.name === activeProjectName) ?? null;
 
-    // Restore saved diagram nodes when switching projects
+    const mappedTableKeys = useMemo(() => {
+        const keys = new Set<string>();
+        const dm = activeProject?.mapping?.documentModel;
+        if (dm?.root) keys.add(`${dm.root.sourceSchema}.${dm.root.sourceTable}`);
+        dm?.elements.forEach(e => keys.add(`${e.sourceSchema}.${e.sourceTable}`));
+        return keys;
+    }, [activeProject?.mapping]);
+
+    // Restore saved diagram nodes and settings when switching projects
     useEffect(() => {
         isRestoringRef.current = true;
+
+        if (activeProject?.settings?.connectionLineType) {
+            setConnectionLineType(activeProject.settings.connectionLineType as ConnectionLineType);
+        }
+
         const savedNodes = activeProject?.diagrams?.[0]?.tabs?.[0]?.relational?.nodes ?? [];
         const savedEdges = activeProject?.diagrams?.[0]?.tabs?.[0]?.relational?.edges ?? [];
 
@@ -193,14 +235,18 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         setTimeout(() => { isRestoringRef.current = false; }, 100);
     }, [activeProjectName]);
 
-    // Debounced diagram save on node/edge changes
+    // Debounced diagram + settings save on node/edge/connectionLineType changes
     useEffect(() => {
         if (!activeProject || isRestoringRef.current) return;
         if (diagramSaveTimer.current) clearTimeout(diagramSaveTimer.current);
         diagramSaveTimer.current = setTimeout(async () => {
             onDiagramChange?.(activeProject.name, nodes, edges);
-            const updatedProject = {
+            const updatedProject: ProjectData = {
                 ...activeProject,
+                settings: {
+                    ...activeProject.settings,
+                    connectionLineType,
+                },
                 diagrams: [
                     {
                         name: activeProject.diagrams?.[0]?.name || "Main",
@@ -229,6 +275,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
             };
             try {
                 await saveProject(updatedProject);
+                onProjectSettingsUpdated?.(updatedProject);
             } catch (err) {
                 console.error("Failed to save diagram to ProjectRepository", err);
             }
@@ -236,7 +283,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         return () => {
             if (diagramSaveTimer.current) clearTimeout(diagramSaveTimer.current);
         };
-    }, [nodes, edges]);
+    }, [nodes, edges, connectionLineType]);
 
     const handleProjectTableSelect = useCallback(async (tableName: string, schemaName: string) => {
         if (!activeProject) return;
@@ -329,6 +376,45 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         setContextMenu(null);
     }, []);
 
+    const persistSettings = useCallback(async (settings: ProjectSettings, lineType: ConnectionLineType, applyToMapping: boolean) => {
+        if (!activeProject) return;
+        setConnectionLineType(lineType);
+        const mapping = applyToMapping && activeProject.mapping && settings.defaultCasing
+            ? remapAllNames(activeProject.mapping, settings.defaultCasing)
+            : activeProject.mapping;
+        const updatedProject: ProjectData = { ...activeProject, settings, mapping };
+        try {
+            await saveProject(updatedProject);
+            onProjectSettingsUpdated?.(updatedProject);
+        } catch (err) {
+            console.error("Failed to save project settings", err);
+        }
+    }, [activeProject, onProjectSettingsUpdated]);
+
+    const handleConfigSave = useCallback((settings: ProjectSettings, newLineType: ConnectionLineType) => {
+        if (!activeProject) return;
+        setShowConfigDialog(false);
+        const casingChanged = settings.defaultCasing !== activeProject.settings?.defaultCasing;
+        const hasMapping = !!(
+            activeProject.mapping?.documentModel.root ||
+            (activeProject.mapping?.documentModel.elements ?? []).length > 0
+        );
+        if (casingChanged && hasMapping) {
+            setPendingCasingUpdate({ settings, lineType: newLineType });
+        } else {
+            persistSettings(settings, newLineType, false);
+        }
+    }, [activeProject, persistSettings]);
+
+    const handleMappingChange = useCallback(async (updatedProject: ProjectData) => {
+        try {
+            await saveProject(updatedProject);
+            onProjectSchemasUpdated?.(updatedProject);
+        } catch (err) {
+            console.error("Failed to save document model mapping", err);
+        }
+    }, [onProjectSchemasUpdated]);
+
     const handleTableSelect = (table: DbTable, schema: DbSchema) => {
         setSelectedTable(table);
         setSelectedSchema(schema);
@@ -390,7 +476,14 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
     const leftPanelTitle = activeProject ? activeProject.name : "Database Schemas";
     const leftPanelBody = activeProject
-        ? <ProjectPanel project={activeProject} onTableSelect={handleProjectTableSelect} visibleNodeIds={visibleNodeIds} onAddTables={() => setShowAddTablesModal(true)} />
+        ? <ProjectPanel
+            project={activeProject}
+            onTableSelect={viewMode === 'relational' ? handleProjectTableSelect : undefined}
+            onTableMappingRequest={viewMode === 'document' ? (t: string, s: string) => setPendingMappingTable({ tableName: t, schemaName: s }) : undefined}
+            visibleNodeIds={viewMode === 'relational' ? visibleNodeIds : undefined}
+            onAddTables={viewMode === 'relational' ? () => setShowAddTablesModal(true) : undefined}
+            mappedTableKeys={mappedTableKeys.size > 0 ? mappedTableKeys : undefined}
+          />
         : <SchemasPanel
             onTableSelect={handleTableSelect}
             isConnected={!!database}
@@ -448,6 +541,10 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             onLayout={setPendingLayout}
                             connectionLineType={connectionLineType}
                             onConnectionLineTypeChange={setConnectionLineType}
+                            hasActiveProject={!!activeProject}
+                            onOpenConfig={() => setShowConfigDialog(true)}
+                            viewMode={viewMode}
+                            onViewModeChange={activeProject ? setViewMode : undefined}
                         />
                         <div className="flex-1 relative">
                             <div className="absolute inset-0">
@@ -478,12 +575,20 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             </div>
                         </div>
                     </div>
+                    <>
                     <Splitter isDragging={isPluginDragging} {...pluginDragBarProps} />
                     <div
                         className={cn("shrink-0 contents-top max-w-md", isPluginDragging && "dragging")}
                         style={{ width: pluginW }}
                     >
-                        {selectedTable ? (
+                        {viewMode === 'document' && activeProject ? (
+                            <DocumentModelView
+                                project={activeProject}
+                                pendingTable={pendingMappingTable}
+                                onPendingTableConsumed={() => setPendingMappingTable(null)}
+                                onMappingChange={handleMappingChange}
+                            />
+                        ) : selectedTable ? (
                             <div className="h-full w-full bg-slate-700 text-white overflow-auto">
                                 <div className="p-4 border-b border-slate-600">
                                     <h3 className="font-semibold text-lg">{selectedTable.tableName}</h3>
@@ -519,9 +624,20 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             </div>
                         )}
                     </div>
+                    </>
                 </div>
             </div>
         </div>
+
+        {showConfigDialog && activeProject && (
+            <ConfigDialog
+                projectName={activeProject.name}
+                settings={activeProject.settings ?? {}}
+                connectionLineType={connectionLineType}
+                onSave={handleConfigSave}
+                onClose={() => setShowConfigDialog(false)}
+            />
+        )}
 
         {showAddTablesModal && activeProject && (
             <AddTablesModal
@@ -532,6 +648,42 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                     onProjectSchemasUpdated?.(updatedProject);
                 }}
             />
+        )}
+
+        {pendingCasingUpdate && ReactDOM.createPortal(
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+                <div className="bg-slate-700 rounded-lg shadow-2xl border border-slate-500 w-96 p-6">
+                    <h3 className="text-white font-semibold text-base mb-2">Update Mapping Names?</h3>
+                    <p className="text-gray-300 text-sm mb-1">
+                        The default field casing has changed to{' '}
+                        <span className="font-mono text-cyan-300">{pendingCasingUpdate.settings.defaultCasing?.toLowerCase()}</span>.
+                    </p>
+                    <p className="text-gray-400 text-sm mb-5">
+                        Would you like to regenerate all XML names in your document model mapping using the new casing?
+                    </p>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={() => {
+                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, false);
+                                setPendingCasingUpdate(null);
+                            }}
+                            className="px-4 py-2 text-sm text-gray-300 bg-slate-600 rounded hover:bg-slate-500 transition"
+                        >
+                            Keep Existing Names
+                        </button>
+                        <button
+                            onClick={() => {
+                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, true);
+                                setPendingCasingUpdate(null);
+                            }}
+                            className="px-4 py-2 text-sm text-white bg-cyan-600 rounded hover:bg-cyan-500 transition"
+                        >
+                            Update Mapping Names
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
         )}
 
         {contextMenu && ReactDOM.createPortal(
