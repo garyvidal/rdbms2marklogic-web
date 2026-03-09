@@ -53,6 +53,10 @@ export default function App() {
     });
   };
 
+  const handleProjectSchemasUpdated = useCallback((project: ProjectData) => {
+    setOpenProjects((prev) => prev.map((p) => p.name === project.name ? project : p));
+  }, []);
+
   const handleDiagramChange = useCallback((projectName: string, reactNodes: ReactFlowNode[], reactEdges: ReactFlowEdge[]) => {
     const project = openProjectsRef.current.find((p) => p.name === projectName);
     if (!project) return;
@@ -70,7 +74,7 @@ export default function App() {
             y: Math.round(n.position.y),
             width: (n as any).measured?.width ?? 300,
             height: (n as any).measured?.height ?? 200,
-            collapsed: false,
+            collapsed: (n.data as any)?.collapsed ?? false,
           })),
           edges: reactEdges.map((e) => ({
             id: e.id,
@@ -101,6 +105,7 @@ export default function App() {
         onProjectSelect={handleProjectSelect}
         onProjectClose={handleProjectClose}
         onDiagramChange={handleDiagramChange}
+        onProjectSchemasUpdated={handleProjectSchemasUpdated}
       />
       {showWizard && (
         <CreateProjectWizard
@@ -113,6 +118,7 @@ export default function App() {
           onOpen={openProject}
           onClose={() => setShowOpenModal(false)}
           onDeleted={handleProjectClose}
+          onNewProject={() => setShowWizard(true)}
           alreadyOpenNames={openProjects.map((p) => p.name)}
         />
       )}

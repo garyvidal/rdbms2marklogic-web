@@ -25,7 +25,7 @@ export function LayoutControls({ onLayout, disabled }: LayoutControlsProps) {
     useEffect(() => {
         if (!open) return;
         const handler = (e: MouseEvent) => {
-            if (buttonRef.current && !buttonRef.current.closest("[data-layout-controls]")?.contains(e.target as Node)) {
+            if (!(e.target as Element).closest?.("[data-layout-controls]")) {
                 setOpen(false);
             }
         };

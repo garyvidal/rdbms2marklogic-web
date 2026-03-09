@@ -1,24 +1,22 @@
 import React from 'react'
 import { FaMousePointer, FaProjectDiagram, FaRedo, FaUndo } from 'react-icons/fa';
-import DiagramTabs from './DiagramTabs';
-import { ProjectData } from '@/services/projectService';
 import { LayoutControls, LayoutAlgorithm } from './LayoutControls';
+import { ConnectionLineTypeControl } from './ConnectionLineTypeControl';
+import { ConnectionLineType } from '@xyflow/react';
 
 interface SchemaToolbarProps {
-  openProjects: ProjectData[];
-  activeProjectName: string | null;
-  onProjectSelect: (name: string) => void;
-  onProjectClose: (name: string) => void;
+  hasNodes: boolean;
   showEdges: boolean;
   onToggleEdges: () => void;
   onLayout: (algorithm: LayoutAlgorithm) => void;
+  connectionLineType: ConnectionLineType;
+  onConnectionLineTypeChange: (type: ConnectionLineType) => void;
 }
 
-function SchemaToolbar({ openProjects, activeProjectName, onProjectSelect, onProjectClose, showEdges, onToggleEdges, onLayout }: SchemaToolbarProps) {
-  const hasNodes = openProjects.some(p => p.name === activeProjectName);
+function SchemaToolbar({ hasNodes, showEdges, onToggleEdges, onLayout, connectionLineType, onConnectionLineTypeChange }: SchemaToolbarProps) {
   return (
     <div className="w-full h-10 align-top border-b overflow-y-hidden flex items-stretch">
-      <div className="flex items-center border-r border-slate-600 px-1 shrink-0 gap-0.5">
+      <div className="flex items-center px-1 shrink-0 gap-0.5">
         <button id="select-tool" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
           <FaMousePointer />
         </button>
@@ -34,6 +32,7 @@ function SchemaToolbar({ openProjects, activeProjectName, onProjectSelect, onPro
         >
           <FaProjectDiagram />
         </button>
+        <ConnectionLineTypeControl value={connectionLineType} onChange={onConnectionLineTypeChange} />
         <LayoutControls onLayout={onLayout} disabled={!hasNodes} />
         <button id="redo" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
           <FaRedo />
@@ -41,14 +40,6 @@ function SchemaToolbar({ openProjects, activeProjectName, onProjectSelect, onPro
         <button id="undo" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
           <FaUndo />
         </button>
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <DiagramTabs
-          projects={openProjects}
-          activeProjectName={activeProjectName}
-          onProjectSelect={onProjectSelect}
-          onProjectClose={onProjectClose}
-        />
       </div>
     </div>
   )

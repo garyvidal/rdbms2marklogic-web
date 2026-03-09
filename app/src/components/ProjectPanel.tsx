@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { ProjectData } from '@/services/projectService';
-import { FaChevronDown, FaChevronRight, FaTable, FaFolder, FaEye } from 'react-icons/fa';
+import { FaChevronDown, FaChevronRight, FaTable, FaFolder, FaEye, FaPlus } from 'react-icons/fa';
 
 interface ProjectPanelProps {
   project: ProjectData;
   onTableSelect?: (tableName: string, schemaName: string) => void;
   visibleNodeIds?: Set<string>;
+  onAddTables?: () => void;
 }
 
-const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, visibleNodeIds }) => {
+const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, visibleNodeIds, onAddTables }) => {
   const schemas = Object.entries(project.schemas);
   const [expandedSchemas, setExpandedSchemas] = useState<Set<string>>(
     new Set(schemas.map(([key]) => key))
@@ -32,8 +33,17 @@ const ProjectPanel: React.FC<ProjectPanelProps> = ({ project, onTableSelect, vis
   return (
     <div className="flex flex-col h-full w-full bg-slate-700 text-white overflow-hidden">
       <div className="flex-shrink-0 px-3 py-2 border-b border-slate-600">
-        <div className="text-xs font-medium text-gray-400">
-          {schemas.length} schema{schemas.length !== 1 ? 's' : ''} &bull; {totalTables} table{totalTables !== 1 ? 's' : ''}
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-medium text-gray-400">
+            {schemas.length} schema{schemas.length !== 1 ? 's' : ''} &bull; {totalTables} table{totalTables !== 1 ? 's' : ''}
+          </div>
+          <button
+            onClick={onAddTables}
+            title="Add tables to project"
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-600 hover:bg-blue-600 text-gray-300 hover:text-white rounded transition"
+          >
+            <FaPlus size={9} /> Add
+          </button>
         </div>
         <div className="text-xs text-gray-500 mt-0.5 truncate">
           Connection: {project.connectionName}

@@ -17,7 +17,7 @@ export default function DiagramTabs({ projects, activeProjectName, onProjectSele
   return (
     <div
       ref={scrollRef}
-      className="flex h-full overflow-x-auto overflow-y-hidden bg-slate-800"
+      className="flex h-9 shrink-0 overflow-x-auto overflow-y-hidden bg-slate-800 border-b border-slate-700"
       style={{ scrollbarWidth: "none" }}
     >
       {projects.map((project) => {

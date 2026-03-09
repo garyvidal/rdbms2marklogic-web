@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { FaFolderOpen, FaTimes, FaTrash } from 'react-icons/fa';
+import { FaFolderOpen, FaTimes, FaTrash, FaPlus } from 'react-icons/fa';
 import { ProjectData, getProjects, deleteProject } from '@/services/projectService';
 
 interface OpenProjectModalProps {
   onOpen: (project: ProjectData) => void;
   onClose: () => void;
   onDeleted?: (projectName: string) => void;
+  onNewProject?: () => void;
   alreadyOpenNames: string[];
 }
 
-export default function OpenProjectModal({ onOpen, onClose, onDeleted, alreadyOpenNames }: OpenProjectModalProps) {
+export default function OpenProjectModal({ onOpen, onClose, onDeleted, onNewProject, alreadyOpenNames }: OpenProjectModalProps) {
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,17 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, alreadyOp
           {loading && <p className="text-gray-400 text-sm">Loading projects...</p>}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           {!loading && !error && projects.length === 0 && (
-            <p className="text-gray-400 text-sm">No saved projects found.</p>
+            <div className="flex flex-col items-center gap-4 py-6 text-center">
+              <p className="text-gray-400 text-sm">No saved projects found.</p>
+              {onNewProject && (
+                <button
+                  onClick={() => { onClose(); onNewProject(); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm rounded transition"
+                >
+                  <FaPlus size={12} /> Create New Project
+                </button>
+              )}
+            </div>
           )}
           {!loading && !error && projects.length > 0 && (
             <ul className="space-y-2">

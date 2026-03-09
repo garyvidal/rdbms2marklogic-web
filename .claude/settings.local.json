@@ -10,7 +10,10 @@
       "Bash(git config --global user.email \"gvidalsassoon@gmail.com\")",
       "Bash(\"c:/Users/garyv/IdeaProjects/RdmsToMarkLogic/.gitignore\":*)",
       "Bash(\"c:/Users/garyv/Workspace/rdbms2marklogic_web/.gitignore\")",
-      "Bash(git -C \"c:/Users/garyv/Workspace/rdbms2marklogic_web\" rm --cached .claude/settings.local.json)"
+      "Bash(git -C \"c:/Users/garyv/Workspace/rdbms2marklogic_web\" rm --cached .claude/settings.local.json)",
+      "Bash(xargs grep -l \"Edge\\\\|edge\")",
+      "Bash(python3 -c \":*)",
+      "Bash(python3 write_schema_view.py)"
     ]
   }
 }
