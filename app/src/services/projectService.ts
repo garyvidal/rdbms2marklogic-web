@@ -71,10 +71,30 @@ export type XmlSchemaType =
   | 'xs:long'
   | 'xs:date'
   | 'xs:dateTime'
-  | 'xs:boolean';
+  | 'xs:boolean'
+  | 'xs:decimal'
+  | 'xs:hexBinary'
+  ;
 
 export type TableMappingType = 'RootElement' | 'Elements' | 'InlineElement' | 'CUSTOM';
 export type ColumnMappingType = 'Element' | 'ElementAttribute' | 'CUSTOM';
+
+export type JoinType = 'equals' | 'notEquals' | 'lessThan' | 'lessThanOrEqual' | 'greaterThan' | 'greaterThanOrEqual' | 'like';
+
+export interface JoinCondition {
+  sourceColumn: string;
+  joinType: JoinType;
+  targetColumn: string;
+}
+
+export interface SyntheticJoin {
+  id: string;
+  sourceSchema: string;
+  sourceTable: string;
+  targetSchema: string;
+  targetTable: string;
+  conditions: JoinCondition[];
+}
 
 export interface XmlColumnMapping {
   sourceColumn: string;
@@ -121,6 +141,7 @@ export interface ProjectData {
   diagrams?: DiagramContainer[] | null;
   settings?: ProjectSettings;
   mapping?: ProjectMapping;
+  syntheticJoins?: SyntheticJoin[];
 }
 
 export const saveProject = async (project: ProjectData): Promise<ProjectData> => {

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { FaFileCode, FaPlus, FaCode } from 'react-icons/fa';
 import type {
     ProjectData,
@@ -8,6 +8,23 @@ import type {
     XmlSchemaType,
     TableMappingType,
 } from '@/services/projectService';
+
+/** Returns true if there is an FK relationship or synthetic join between two tables (in either direction). */
+function hasTableRelationship(
+    project: ProjectData,
+    a: { schema: string; table: string },
+    b: { schema: string; table: string },
+): boolean {
+    const aRels = project.schemas[a.schema]?.tables?.[a.table]?.relationships ?? [];
+    if (aRels.some(r => r.toTable === b.table)) return true;
+    const bRels = project.schemas[b.schema]?.tables?.[b.table]?.relationships ?? [];
+    if (bRels.some(r => r.toTable === a.table)) return true;
+    const joins = project.syntheticJoins ?? [];
+    return joins.some(j =>
+        (j.sourceSchema === a.schema && j.sourceTable === a.table && j.targetSchema === b.schema && j.targetTable === b.table) ||
+        (j.sourceSchema === b.schema && j.sourceTable === b.table && j.targetSchema === a.schema && j.targetTable === a.table),
+    );
+}
 import { convertCaseFromSetting } from '@/lib/caseConverter';
 import { mapSqlTypeToXsd } from '@/lib/typeMapper';
 import MappingTableCard from './MappingTableCard';
@@ -19,6 +36,9 @@ interface DocumentModelViewProps {
     pendingTable: { tableName: string; schemaName: string } | null;
     onPendingTableConsumed: () => void;
     onMappingChange: (updatedProject: ProjectData) => void;
+    /** Table selected by clicking a diagram node that is already mapped — scrolls to and highlights its card. */
+    highlightedTable?: { tableName: string; schemaName: string } | null;
+    onHighlightedTableConsumed?: () => void;
 }
 
 /** Build a full XmlTableMapping for a given table using the project's column data. */
@@ -62,9 +82,24 @@ export default function DocumentModelView({
     pendingTable,
     onPendingTableConsumed,
     onMappingChange,
+    highlightedTable,
+    onHighlightedTableConsumed,
 }: DocumentModelViewProps) {
     const mapping = project.mapping ?? emptyMapping();
     const { root, elements } = mapping.documentModel;
+
+    const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+    // Scroll to and briefly highlight a card when a mapped node is clicked on the diagram.
+    React.useEffect(() => {
+        if (!highlightedTable) return;
+        const key = `${highlightedTable.schemaName}.${highlightedTable.tableName}`;
+        const el = cardRefs.current.get(key);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        onHighlightedTableConsumed?.();
+    }, [highlightedTable]);
 
     const [showPopover, setShowPopover] = useState(false);
     const [popoverStep, setPopoverStep] = useState<PopoverStep>('type');
@@ -80,13 +115,35 @@ export default function DocumentModelView({
         }
     }, [pendingTable]);
 
-    // Options for inline-element parent selection: root + non-CUSTOM elements
-    const parentOptions = [
-        ...(root ? [{ xmlName: root.xmlName, label: `Root: <${root.xmlName}>` }] : []),
+    // Options for inline-element parent selection: root + non-CUSTOM elements, with relationship check.
+    type ParentOption = { xmlName: string; label: string; sourceSchema: string; sourceTable: string; hasRelationship: boolean };
+    const parentOptions: ParentOption[] = [
+        ...(root ? [{
+            xmlName: root.xmlName,
+            label: `Root: <${root.xmlName}>`,
+            sourceSchema: root.sourceSchema,
+            sourceTable: root.sourceTable,
+            hasRelationship: pendingTable
+                ? hasTableRelationship(project,
+                    { schema: pendingTable.schemaName, table: pendingTable.tableName },
+                    { schema: root.sourceSchema,       table: root.sourceTable })
+                : false,
+        }] : []),
         ...(elements ?? [])
             .filter(e => e.mappingType === 'Elements' || e.mappingType === 'InlineElement')
-            .map(e => ({ xmlName: e.xmlName, label: `Element: <${e.xmlName}>` })),
+            .map(e => ({
+                xmlName: e.xmlName,
+                label: `Element: <${e.xmlName}>`,
+                sourceSchema: e.sourceSchema,
+                sourceTable: e.sourceTable,
+                hasRelationship: pendingTable
+                    ? hasTableRelationship(project,
+                        { schema: pendingTable.schemaName, table: pendingTable.tableName },
+                        { schema: e.sourceSchema,          table: e.sourceTable })
+                    : false,
+            })),
     ];
+    const validParentOptions = parentOptions.filter(p => p.hasRelationship);
 
     const handleAddMapping = useCallback((type: TableMappingType, parentRef?: string) => {
         if (!pendingTable) return;
@@ -113,8 +170,8 @@ export default function DocumentModelView({
     };
 
     const handleInlineElementClick = () => {
-        if (parentOptions.length === 0) return;
-        setInlineParentRef(parentOptions[0].xmlName);
+        if (validParentOptions.length === 0) return;
+        setInlineParentRef(validParentOptions[0].xmlName);
         setPopoverStep('inline-parent');
     };
 
@@ -241,7 +298,7 @@ export default function DocumentModelView({
                                     </button>
                                     <button
                                         onClick={handleInlineElementClick}
-                                        disabled={parentOptions.length === 0}
+                                        disabled={validParentOptions.length === 0}
                                         className="w-full text-left px-4 py-3 rounded border transition
                                             enabled:border-violet-600 enabled:bg-violet-900/30 enabled:hover:bg-violet-900/60 enabled:text-white
                                             disabled:border-slate-600 disabled:bg-slate-800 disabled:text-gray-600 disabled:cursor-not-allowed"
@@ -250,7 +307,9 @@ export default function DocumentModelView({
                                         <div className="text-xs mt-0.5 text-gray-400">
                                             {parentOptions.length === 0
                                                 ? 'Add a Root or Elements mapping first'
-                                                : 'Nests this table inside another element'}
+                                                : validParentOptions.length === 0
+                                                    ? 'No related tables mapped — create a join first'
+                                                    : 'Nests this table inside a related element'}
                                         </div>
                                     </button>
                                 </div>
@@ -271,14 +330,21 @@ export default function DocumentModelView({
                                     {parentOptions.map(p => (
                                         <button
                                             key={p.xmlName}
-                                            onClick={() => setInlineParentRef(p.xmlName)}
+                                            onClick={() => p.hasRelationship && setInlineParentRef(p.xmlName)}
+                                            disabled={!p.hasRelationship}
+                                            title={!p.hasRelationship ? 'No table relationship — create a synthetic join first' : undefined}
                                             className={`w-full text-left px-3 py-2 rounded border text-sm font-mono transition ${
-                                                inlineParentRef === p.xmlName
-                                                    ? 'border-violet-500 bg-violet-900/40 text-violet-200'
-                                                    : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-400'
+                                                !p.hasRelationship
+                                                    ? 'border-slate-700 bg-slate-800/40 text-gray-600 cursor-not-allowed'
+                                                    : inlineParentRef === p.xmlName
+                                                        ? 'border-violet-500 bg-violet-900/40 text-violet-200'
+                                                        : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-400'
                                             }`}
                                         >
-                                            {p.label}
+                                            <span>{p.label}</span>
+                                            {!p.hasRelationship && (
+                                                <span className="ml-2 text-xs text-gray-600 font-sans">no relationship</span>
+                                            )}
                                         </button>
                                     ))}
                                 </div>
@@ -291,7 +357,7 @@ export default function DocumentModelView({
                                     </button>
                                     <button
                                         onClick={() => handleAddMapping('InlineElement', inlineParentRef)}
-                                        disabled={!inlineParentRef}
+                                        disabled={!inlineParentRef || !validParentOptions.some(p => p.xmlName === inlineParentRef)}
                                         className="flex-1 px-3 py-1.5 text-xs font-semibold rounded transition
                                             enabled:bg-violet-700 enabled:hover:bg-violet-600 enabled:text-white
                                             disabled:bg-slate-700 disabled:text-gray-600 disabled:cursor-not-allowed"
@@ -325,16 +391,27 @@ export default function DocumentModelView({
                 )}
 
                 {/* Root element card */}
-                {root && (
-                    <div>
-                        <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">Root Element</div>
-                        <MappingTableCard
-                            mapping={root}
-                            onChange={handleCardChange}
-                            onRemove={handleRemoveRoot}
-                        />
-                    </div>
-                )}
+                {root && (() => {
+                    const key = `${root.sourceSchema}.${root.sourceTable}`;
+                    const isHighlighted = highlightedTable
+                        ? highlightedTable.schemaName === root.sourceSchema && highlightedTable.tableName === root.sourceTable
+                        : false;
+                    return (
+                        <div>
+                            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">Root Element</div>
+                            <div
+                                ref={el => el ? cardRefs.current.set(key, el) : cardRefs.current.delete(key)}
+                                className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}
+                            >
+                                <MappingTableCard
+                                    mapping={root}
+                                    onChange={handleCardChange}
+                                    onRemove={handleRemoveRoot}
+                                />
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Elements + Inline Elements */}
                 {normalElements.length > 0 && (
@@ -344,13 +421,22 @@ export default function DocumentModelView({
                             {normalElements.map((el, i) => {
                                 // Index in the full elements array for removal
                                 const fullIndex = (elements ?? []).indexOf(el);
+                                const key = `${el.sourceSchema}.${el.sourceTable}`;
+                                const isHighlighted = highlightedTable
+                                    ? highlightedTable.schemaName === el.sourceSchema && highlightedTable.tableName === el.sourceTable
+                                    : false;
                                 return (
-                                    <MappingTableCard
+                                    <div
                                         key={`${el.sourceSchema}.${el.sourceTable}.${el.mappingType}.${i}`}
-                                        mapping={el}
-                                        onChange={handleCardChange}
-                                        onRemove={() => handleRemoveElement(fullIndex)}
-                                    />
+                                        ref={div => div ? cardRefs.current.set(key, div) : cardRefs.current.delete(key)}
+                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}
+                                    >
+                                        <MappingTableCard
+                                            mapping={el}
+                                            onChange={handleCardChange}
+                                            onRemove={() => handleRemoveElement(fullIndex)}
+                                        />
+                                    </div>
                                 );
                             })}
                         </div>

@@ -1,6 +1,124 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { FaTimes, FaTag, FaLayerGroup, FaLink, FaGripVertical, FaChevronDown, FaChevronUp, FaPlus, FaDatabase } from 'react-icons/fa';
 import type { XmlTableMapping, ColumnMappingType, XmlSchemaType } from '@/services/projectService';
+
+// ── FunctionTextarea: textarea with field-name autocomplete ───────────────────
+
+interface FunctionTextareaProps {
+    value: string;
+    onChange: (v: string) => void;
+    fieldNames: string[];
+    placeholder?: string;
+    rows?: number;
+    className?: string;
+    onMouseDown?: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
+}
+
+function getTokenAtCursor(text: string, cursor: number): { token: string; start: number } {
+    let start = cursor;
+    while (start > 0 && /[\w.]/.test(text[start - 1])) start--;
+    return { token: text.slice(start, cursor), start };
+}
+
+function FunctionTextarea({ value, onChange, fieldNames, placeholder, rows = 5, className, onMouseDown }: FunctionTextareaProps) {
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [selectedIdx, setSelectedIdx] = useState(0);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const computeSuggestions = useCallback((text: string, cursor: number): string[] => {
+        const { token } = getTokenAtCursor(text, cursor);
+        if (!token) return [];
+
+        // fields.xxx → suggest matching column names as completions
+        const fieldsMatch = token.match(/^fields\.(\w*)$/);
+        if (fieldsMatch) {
+            const partial = fieldsMatch[1].toLowerCase();
+            return fieldNames
+                .filter(f => f.toLowerCase().startsWith(partial))
+                .map(f => `fields.${f}`);
+        }
+
+        // partial word → suggest 'fields' if it matches
+        if (token.length >= 1 && 'fields'.startsWith(token.toLowerCase()) && token.toLowerCase() !== 'fields') {
+            return ['fields'];
+        }
+
+        return [];
+    }, [fieldNames]);
+
+    const applySuggestion = useCallback((suggestion: string) => {
+        const ta = textareaRef.current;
+        if (!ta) return;
+        const cursor = ta.selectionStart ?? 0;
+        const { start } = getTokenAtCursor(value, cursor);
+        const newValue = value.slice(0, start) + suggestion + value.slice(cursor);
+        onChange(newValue);
+        setSuggestions([]);
+        const newCursor = start + suggestion.length;
+        requestAnimationFrame(() => {
+            ta.selectionStart = newCursor;
+            ta.selectionEnd = newCursor;
+            ta.focus();
+        });
+    }, [value, onChange]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        onChange(e.target.value);
+        const cursor = e.target.selectionStart ?? 0;
+        setSuggestions(computeSuggestions(e.target.value, cursor));
+        setSelectedIdx(0);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (suggestions.length === 0) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedIdx(i => Math.min(i + 1, suggestions.length - 1));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedIdx(i => Math.max(i - 1, 0));
+        } else if (e.key === 'Tab' || e.key === 'Enter') {
+            e.preventDefault();
+            applySuggestion(suggestions[selectedIdx]);
+        } else if (e.key === 'Escape') {
+            setSuggestions([]);
+        }
+    };
+
+    return (
+        <div className="relative">
+            <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                onBlur={() => setTimeout(() => setSuggestions([]), 150)}
+                onMouseDown={onMouseDown}
+                rows={rows}
+                spellCheck={false}
+                placeholder={placeholder}
+                className={className}
+            />
+            {suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 z-50 bg-slate-800 border border-amber-700 rounded shadow-lg overflow-hidden mt-0.5">
+                    {suggestions.map((s, idx) => (
+                        <div
+                            key={s}
+                            onMouseDown={e => { e.preventDefault(); applySuggestion(s); }}
+                            className={`px-2 py-1 text-xs font-mono cursor-pointer ${
+                                idx === selectedIdx
+                                    ? 'bg-amber-900/60 text-amber-200'
+                                    : 'text-green-300 hover:bg-slate-700'
+                            }`}
+                        >
+                            {s}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 interface MappingTableCardProps {
     mapping: XmlTableMapping;
@@ -91,6 +209,11 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
     };
 
     const XSD_TYPES: XmlSchemaType[] = ['xs:string', 'xs:integer', 'xs:long', 'xs:date', 'xs:dateTime', 'xs:boolean'];
+
+    /** DB column names available as `fields.X` in custom functions */
+    const availableFieldNames = mapping.columns
+        .filter(c => c.sourceColumn !== '')
+        .map(c => c.sourceColumn);
 
     const addCustomField = () => {
         onChange({ ...mapping, columns: [...mapping.columns, { sourceColumn: '', xmlName: 'customField', xmlType: 'xs:string' as XmlSchemaType, mappingType: 'Element' as ColumnMappingType }] });
@@ -298,11 +421,11 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
                                         — <code className="text-amber-300">fields</code> contains referenced columns
                                     </span>
                                 </label>
-                                <textarea
+                                <FunctionTextarea
                                     value={mapping.customFunction ?? ''}
-                                    onChange={e => onChange({ ...mapping, customFunction: e.target.value })}
+                                    onChange={v => onChange({ ...mapping, customFunction: v })}
+                                    fieldNames={availableFieldNames}
                                     rows={6}
-                                    spellCheck={false}
                                     className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs font-mono text-green-300 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y leading-relaxed"
                                 />
                             </div>
@@ -477,12 +600,12 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
                                         JavaScript Function
                                         <span className="text-gray-600 ml-1">— return the computed value for <code className="text-amber-300">{col.xmlName || 'this field'}</code></span>
                                     </label>
-                                    <textarea
+                                    <FunctionTextarea
                                         value={col.customFunction ?? ''}
-                                        onChange={e => updateColumnFn(i, e.target.value)}
+                                        onChange={v => updateColumnFn(i, v)}
                                         onMouseDown={e => e.stopPropagation()}
+                                        fieldNames={availableFieldNames}
                                         rows={5}
-                                        spellCheck={false}
                                         placeholder={`// return the value for ${col.xmlName || 'this field'}\nreturn null;`}
                                         className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs font-mono text-green-300 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-y leading-relaxed"
                                     />

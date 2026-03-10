@@ -15,7 +15,8 @@ import AddTablesModal from "../AddTablesModal";
 import DatabaseConnectionForm from "../DatabaseConnectionForm";
 import { ConfigDialog } from "../ConfigDialog";
 import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, getConnection } from "@/services/schemaService";
-import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, saveProject } from "@/services/projectService";
+import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/projectService";
+import SyntheticJoinDialog from "./SyntheticJoinDialog";
 import { convertCaseFromSetting } from "@/lib/caseConverter";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 import { DatabaseSchemaNode } from "../DatabaseSchemaNode";
@@ -168,6 +169,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const [connectionLineType, setConnectionLineType] = useState<ConnectionLineType>(ConnectionLineType.SmoothStep);
     const [pendingLayout, setPendingLayout] = useState<LayoutAlgorithm | null>(null);
     const [contextMenu, setContextMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null);
+    const [edgeContextMenu, setEdgeContextMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null);
     const [showAddTablesModal, setShowAddTablesModal] = useState(false);
     const [showConfigDialog, setShowConfigDialog] = useState(false);
     const [pendingCasingUpdate, setPendingCasingUpdate] = useState<{
@@ -175,7 +177,9 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         lineType: ConnectionLineType;
     } | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('relational');
+    const [showJoinDialog, setShowJoinDialog] = useState(false);
     const [pendingMappingTable, setPendingMappingTable] = useState<{ tableName: string; schemaName: string } | null>(null);
+    const [highlightedMappingTable, setHighlightedMappingTable] = useState<{ tableName: string; schemaName: string } | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -185,6 +189,8 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const isRestoringRef = useRef(false);
 
     const activeProject = openProjects.find((p) => p.name === activeProjectName) ?? null;
+    const activeProjectRef = useRef<ProjectData | null>(activeProject);
+    activeProjectRef.current = activeProject;
 
     const mappedTableKeys = useMemo(() => {
         const keys = new Set<string>();
@@ -240,20 +246,23 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         if (!activeProject || isRestoringRef.current) return;
         if (diagramSaveTimer.current) clearTimeout(diagramSaveTimer.current);
         diagramSaveTimer.current = setTimeout(async () => {
-            onDiagramChange?.(activeProject.name, nodes, edges);
+            // Use ref to get the latest project (avoids stale closure overwriting mapping changes)
+            const latestProject = activeProjectRef.current;
+            if (!latestProject) return;
+            onDiagramChange?.(latestProject.name, nodes, edges);
             const updatedProject: ProjectData = {
-                ...activeProject,
+                ...latestProject,
                 settings: {
-                    ...activeProject.settings,
+                    ...latestProject.settings,
                     connectionLineType,
                 },
                 diagrams: [
                     {
-                        name: activeProject.diagrams?.[0]?.name || "Main",
+                        name: latestProject.diagrams?.[0]?.name || "Main",
                         tabs: [
                             {
-                                id: activeProject.diagrams?.[0]?.tabs?.[0]?.id || "tab-1",
-                                name: activeProject.diagrams?.[0]?.tabs?.[0]?.name || "Relational",
+                                id: latestProject.diagrams?.[0]?.tabs?.[0]?.id || "tab-1",
+                                name: latestProject.diagrams?.[0]?.tabs?.[0]?.name || "Relational",
                                 relational: {
                                     nodes: nodes.map(n => ({
                                         id: n.id,
@@ -365,8 +374,21 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         });
     }, []);
 
+    const handleNodeClick = useCallback((_event: React.MouseEvent, node: ReactFlowNode) => {
+        if (!activeProject) return;
+        const dotIdx = node.id.indexOf('.');
+        const schemaName = node.id.substring(0, dotIdx);
+        const tableName = node.id.substring(dotIdx + 1);
+        if (mappedTableKeys.has(node.id)) {
+            setHighlightedMappingTable({ tableName, schemaName });
+        } else {
+            setPendingMappingTable({ tableName, schemaName });
+        }
+    }, [activeProject, mappedTableKeys]);
+
     const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
         event.preventDefault();
+        setEdgeContextMenu(null);
         setContextMenu({ nodeId: node.id, x: event.clientX, y: event.clientY });
     }, []);
 
@@ -375,6 +397,39 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         setEdges(prev => prev.filter(e => e.source !== nodeId && e.target !== nodeId));
         setContextMenu(null);
     }, []);
+
+    const handleEdgeContextMenu = useCallback((event: React.MouseEvent, edge: ReactFlowEdge) => {
+        if (!edge.id.startsWith('synth-')) return;
+        event.preventDefault();
+        setContextMenu(null);
+        setEdgeContextMenu({ edgeId: edge.id, x: event.clientX, y: event.clientY });
+    }, []);
+
+    const handleDeleteJoin = useCallback(async (edgeId: string) => {
+        // Parse edge ID: "synth-{sourceSchema}.{sourceTable}->{targetSchema}.{targetTable}"
+        const withoutPrefix = edgeId.substring('synth-'.length);
+        const arrowIdx = withoutPrefix.indexOf('->');
+        const sourceNodeId = withoutPrefix.substring(0, arrowIdx);
+        const targetNodeId = withoutPrefix.substring(arrowIdx + 2);
+
+        setEdges(prev => prev.filter(e => e.id !== edgeId));
+        setEdgeContextMenu(null);
+
+        if (!activeProject) return;
+        const updatedProject: ProjectData = {
+            ...activeProject,
+            syntheticJoins: (activeProject.syntheticJoins ?? []).filter(j =>
+                `${j.sourceSchema}.${j.sourceTable}` !== sourceNodeId ||
+                `${j.targetSchema}.${j.targetTable}` !== targetNodeId,
+            ),
+        };
+        try {
+            await saveProject(updatedProject);
+            onProjectSchemasUpdated?.(updatedProject);
+        } catch (err) {
+            console.error("Failed to delete synthetic join", err);
+        }
+    }, [activeProject, onProjectSchemasUpdated]);
 
     const persistSettings = useCallback(async (settings: ProjectSettings, lineType: ConnectionLineType, applyToMapping: boolean) => {
         if (!activeProject) return;
@@ -405,6 +460,32 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
             persistSettings(settings, newLineType, false);
         }
     }, [activeProject, persistSettings]);
+
+    const handleCreateJoin = useCallback(async (join: SyntheticJoin) => {
+        if (!activeProject) return;
+        const sourceId = `${join.sourceSchema}.${join.sourceTable}`;
+        const targetId = `${join.targetSchema}.${join.targetTable}`;
+        const edgeId = `synth-${sourceId}->${targetId}`;
+        const updatedProject: ProjectData = {
+            ...activeProject,
+            syntheticJoins: [
+                ...(activeProject.syntheticJoins ?? []).filter(j => j.id !== join.id),
+                join,
+            ],
+        };
+        try {
+            await saveProject(updatedProject);
+            onProjectSchemasUpdated?.(updatedProject);
+        } catch (err) {
+            console.error("Failed to save synthetic join", err);
+        }
+        setEdges(prev => {
+            if (prev.some(e => e.id === edgeId)) return prev;
+            const newEdge = { id: edgeId, source: sourceId, target: targetId };
+            return reanchorEdges(nodes, [...prev, newEdge]);
+        });
+        setShowJoinDialog(false);
+    }, [activeProject, nodes, onProjectSchemasUpdated]);
 
     const handleMappingChange = useCallback(async (updatedProject: ProjectData) => {
         try {
@@ -496,7 +577,23 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
     return (
         <>
-        <div className="relative h-full w-full flex">
+        {/* SVG marker definitions for crow's foot ER notation (one-to-many) */}
+        <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+            <defs>
+                {/* Single bar at the "one" end (markerEnd / target side) */}
+                <marker id="crowsfoot-one" viewBox="-2 -2 8 20" refX="2" refY="8"
+                        markerWidth="4" markerHeight="16" orient="auto" overflow="visible">
+                    <line x1="2" y1="0" x2="2" y2="16" stroke="#94a3b8" strokeWidth="1.5"/>
+                </marker>
+                {/* Crow's foot at the "many" end (markerStart / source side) */}
+                <marker id="crowsfoot-many" viewBox="-2 -2 14 20" refX="0" refY="8"
+                        markerWidth="10" markerHeight="16" orient="auto-start-reverse" overflow="visible">
+                    <path d="M 0 8 L 10 0 M 0 8 L 10 8 M 0 8 L 10 16"
+                          stroke="#94a3b8" strokeWidth="1.5" fill="none"/>
+                </marker>
+            </defs>
+        </svg>
+        <div className="relative flex-1 overflow-hidden flex">
             {showModal && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 rounded">
                     <div className="bg-slate-700 rounded-lg shadow-2xl p-8 relative max-w-2xl w-full mx-4">
@@ -543,22 +640,40 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             onConnectionLineTypeChange={setConnectionLineType}
                             hasActiveProject={!!activeProject}
                             onOpenConfig={() => setShowConfigDialog(true)}
+                            onCreateJoin={activeProject ? () => setShowJoinDialog(true) : undefined}
                             viewMode={viewMode}
                             onViewModeChange={activeProject ? setViewMode : undefined}
                         />
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative overflow-hidden">
                             <div className="absolute inset-0">
                                 <ReactFlow
                                     nodes={nodes}
-                                    edges={showEdges ? edges.map(e => ({ ...e, type: connectionLineType })) : []}
+                                    edges={showEdges ? edges.map(e => {
+                                        const isSynthetic = e.id.startsWith('synth-');
+                                        return {
+                                            ...e,
+                                            type: connectionLineType,
+                                            style: isSynthetic
+                                                ? { stroke: '#eab308', strokeWidth: 2 }
+                                                : undefined,
+                                            markerEnd: isSynthetic
+                                                ? { type: 'arrowclosed' as const, color: '#eab308' }
+                                                : 'crowsfoot-one',
+                                            markerStart: isSynthetic
+                                                ? undefined
+                                                : 'crowsfoot-many',
+                                        };
+                                    }) : []}
                                     onNodesChange={onNodesChange}
                                     onEdgesChange={onEdgesChange}
                                     nodeTypes={nodeTypes}
                                     colorMode="dark"
                                     fitView
+                                    onNodeClick={handleNodeClick}
                                     onNodeContextMenu={handleNodeContextMenu}
+                                    onEdgeContextMenu={handleEdgeContextMenu}
                                     onNodeDragStop={handleNodeDragStop}
-                                    onPaneClick={() => setContextMenu(null)}
+                                    onPaneClick={() => { setContextMenu(null); setEdgeContextMenu(null); setHighlightedMappingTable(null); }}
                                     connectionLineType={connectionLineType}
                                 >
                                     <Controls />
@@ -578,7 +693,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                     <>
                     <Splitter isDragging={isPluginDragging} {...pluginDragBarProps} />
                     <div
-                        className={cn("shrink-0 contents-top max-w-md", isPluginDragging && "dragging")}
+                        className={cn("shrink-0 contents-top max-w-md h-full overflow-hidden", isPluginDragging && "dragging")}
                         style={{ width: pluginW }}
                     >
                         {activeProject ? (
@@ -587,6 +702,8 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                 pendingTable={pendingMappingTable}
                                 onPendingTableConsumed={() => setPendingMappingTable(null)}
                                 onMappingChange={handleMappingChange}
+                                highlightedTable={highlightedMappingTable}
+                                onHighlightedTableConsumed={() => setHighlightedMappingTable(null)}
                             />
                         ) : selectedTable ? (
                             <div className="h-full w-full bg-slate-700 text-white overflow-auto">
@@ -639,6 +756,15 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
             />
         )}
 
+        {showJoinDialog && activeProject && (
+            <SyntheticJoinDialog
+                project={activeProject}
+                visibleNodeIds={nodes.map(n => n.id)}
+                onConfirm={handleCreateJoin}
+                onCancel={() => setShowJoinDialog(false)}
+            />
+        )}
+
         {showAddTablesModal && activeProject && (
             <AddTablesModal
                 project={activeProject}
@@ -682,6 +808,26 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                         </button>
                     </div>
                 </div>
+            </div>,
+            document.body
+        )}
+
+        {edgeContextMenu && ReactDOM.createPortal(
+            <div
+                style={{ position: "fixed", top: edgeContextMenu.y, left: edgeContextMenu.x, zIndex: 9999 }}
+                className="bg-slate-800 border border-yellow-700 rounded shadow-lg py-1 min-w-[180px]"
+                onMouseLeave={() => setEdgeContextMenu(null)}
+            >
+                <div className="px-3 py-1 text-xs text-yellow-500 border-b border-slate-600 mb-1 flex items-center gap-1.5">
+                    <span>⚡</span>
+                    <span className="truncate max-w-[160px]">Synthetic Join</span>
+                </div>
+                <button
+                    className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-slate-600 hover:text-red-300 transition"
+                    onClick={() => handleDeleteJoin(edgeContextMenu.edgeId)}
+                >
+                    Delete join
+                </button>
             </div>,
             document.body
         )}

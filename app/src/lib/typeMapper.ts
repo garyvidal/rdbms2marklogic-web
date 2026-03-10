@@ -18,6 +18,11 @@ export function mapSqlTypeToXsd(sqlType: string): XmlSchemaType {
     if (/^(INT|INTEGER|SMALLINT|TINYINT|MEDIUMINT|SERIAL|INT2|INT4|INT8)$/.test(t)) {
         return 'xs:integer';
     }
-
+    if(/^(REAL|FLOAT|DOUBLE|DOUBLE PRECISION|DECIMAL|NUMERIC|MONEY)$/.test(t)) {
+        return 'xs:decimal';
+    }
+    if(/^(TEXT|CLOB|JSON|XML)$/.test(t)) {
+        return 'xs:hexBinary';
+    }
     return 'xs:string';
 }

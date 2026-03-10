@@ -15,7 +15,9 @@
       "Bash(python3 -c \":*)",
       "Bash(python3 write_schema_view.py)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx vite build)"
+      "Bash(npx vite build)",
+      "Bash(xargs grep -l \"DocumentModel\\\\|DocumentMapping\")",
+      "Bash(grep -o \".\\\\{0,200\\\\}getMarkerId.\\\\{0,500\\\\}\")"
     ]
   }
 }
