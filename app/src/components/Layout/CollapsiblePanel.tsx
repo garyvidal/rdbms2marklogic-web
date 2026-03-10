@@ -1,25 +1,67 @@
-import { ChevronDownCircle } from 'lucide-react'
-import React, { useState } from 'react'
-import {FaChevronCircleDown,FaChevronCircleRight,FaChevronCircleLeft, FaDatabase} from 'react-icons/fa'
+import * as React from 'react'
+import { FaChevronCircleRight, FaChevronCircleLeft, FaDatabase } from 'react-icons/fa'
 
-const CollapsiblePanel = ({title,body,direction}) => {
-  const [isOpen, setIsOpen] = useState(true);
-  return (
-    <div className="flex flex-col h-full bg-slate-700 text-white">
-        <h2 className="flex items-center shrink-0 border-b border-slate-600 bg-slate-800">
-            <span className="p-2 text-gray-400">
-                <FaDatabase/>
-            </span>
-            <span className="flex-1 p-2 text-left text-sm font-medium truncate">{title}</span>
-            <button
-                className="p-2 text-gray-400 hover:text-white"
-                onClick={() => setIsOpen(v => !v)}
-            >
-                {isOpen ? <FaChevronCircleLeft/> : <FaChevronCircleRight />}
-            </button>
-        </h2>
-        {isOpen && <div className="flex-1 overflow-auto">{body}</div>}
-    </div>
-  )
+interface CollapsiblePanelProps {
+    title: string;
+    body: React.ReactNode;
+    direction: 'left' | 'right';
+    ribbonLabel?: string;
+    collapsed?: boolean;
+    onToggle?: () => void;
 }
+
+const CollapsiblePanel = ({ title, body, direction, ribbonLabel, collapsed, onToggle }: CollapsiblePanelProps) => {
+    if (collapsed) {
+        const label = ribbonLabel ?? title;
+        return (
+            <div
+                className="flex flex-col h-full bg-slate-800 border-r border-slate-600 w-8 items-center select-none cursor-pointer hover:bg-slate-700 transition-colors"
+                onClick={onToggle}
+                title={`Expand ${label}`}
+            >
+                {direction === 'right' && (
+                    <div className="pt-2 pb-1 text-gray-400 hover:text-white shrink-0">
+                        <FaChevronCircleLeft />
+                    </div>
+                )}
+                <div className="flex-1 flex items-center justify-center overflow-hidden">
+                    <span
+                        className="text-gray-400 text-xs font-medium tracking-wide whitespace-nowrap"
+                        style={{
+                            writingMode: 'vertical-rl',
+                            transform: direction === 'left' ? 'rotate(180deg)' : 'none',
+                        }}
+                    >
+                        {label}
+                    </span>
+                </div>
+                {direction === 'left' && (
+                    <div className="pb-2 pt-1 text-gray-400 hover:text-white shrink-0">
+                        <FaChevronCircleRight />
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex flex-col h-full bg-slate-700 text-white">
+            <h2 className="flex items-center shrink-0 border-b border-slate-600 bg-slate-800">
+                <span className="p-2 text-gray-400">
+                    <FaDatabase />
+                </span>
+                <span className="flex-1 p-2 text-left text-sm font-medium truncate">{title}</span>
+                <button
+                    className="p-2 text-gray-400 hover:text-white"
+                    onClick={onToggle}
+                    title={`Collapse`}
+                >
+                    {direction === 'left' ? <FaChevronCircleLeft /> : <FaChevronCircleRight />}
+                </button>
+            </h2>
+            <div className="flex-1 overflow-auto">{body}</div>
+        </div>
+    );
+};
+
 export default CollapsiblePanel;

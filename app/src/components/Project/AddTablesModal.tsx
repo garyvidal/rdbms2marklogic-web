@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { analyzeSchema, getConnection, DbDatabase } from '@/services/SchemaService';
+import { analyzeSchema, resolveConnection, DbDatabase } from '@/services/SchemaService';
 import { ProjectData, saveProject } from '@/services/ProjectService';
 import { FaFolder, FaSpinner, FaTable } from 'react-icons/fa';
 
@@ -20,7 +20,7 @@ const AddTablesModal: React.FC<AddTablesModalProps> = ({ project, onClose, onTab
   useEffect(() => {
     const load = async () => {
       try {
-        const savedConn = await getConnection(project.connectionName);
+        const savedConn = await resolveConnection(project.connectionId, project.connectionName);
         const db = await analyzeSchema({
           connection: savedConn.connection,
           includeTables: true,

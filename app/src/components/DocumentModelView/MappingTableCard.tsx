@@ -124,6 +124,8 @@ interface MappingTableCardProps {
     mapping: XmlTableMapping;
     onChange: (updated: XmlTableMapping) => void;
     onRemove: () => void;
+    /** Resolved xmlName of the parent mapping (for InlineElement display). */
+    parentXmlName?: string;
 }
 
 const XML_TYPE_COLOR: Record<XmlSchemaType, string> = {
@@ -166,7 +168,7 @@ const ACCENT: Record<string, string> = {
 
 const DND_KEY = 'application/x-row-index';
 
-export default function MappingTableCard({ mapping, onChange, onRemove }: MappingTableCardProps) {
+export default function MappingTableCard({ mapping, onChange, onRemove, parentXmlName }: MappingTableCardProps) {
     const [settingsOpen, setSettingsOpen] = useState(false);
     /** Index of custom field row whose fn editor is open (-1 = none). */
     const [expandedFnIndex, setExpandedFnIndex] = useState(-1);
@@ -305,12 +307,12 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
                 </span>
 
                 <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
-                    {isInline && mapping.parentRef && (
+                    {isInline && parentXmlName && (
                         <>
                             <FaLink size={8} className="text-violet-400 shrink-0" />
                             <span className="text-xs text-violet-400 font-mono shrink-0 max-w-[80px] truncate"
-                                  title={mapping.parentRef}>
-                                {mapping.parentRef}
+                                  title={parentXmlName}>
+                                {parentXmlName}
                             </span>
                             <span className="text-xs text-gray-500 shrink-0">›</span>
                         </>
@@ -366,7 +368,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
                         <div className="flex items-center gap-2">
                             <label className="text-xs text-gray-500 w-24 shrink-0">Nested Under</label>
                             <span className="text-xs font-mono text-violet-300 bg-violet-900/20 border border-violet-800 px-2 py-1 rounded">
-                                {mapping.parentRef || '(none)'}
+                                {parentXmlName || '(none)'}
                             </span>
                         </div>
                     )}

@@ -1,5 +1,5 @@
-import React from 'react'
-import { FaCog, FaMousePointer, FaProjectDiagram, FaRedo, FaUndo, FaLink } from 'react-icons/fa';
+import * as React from 'react'
+import { FaCog, FaMousePointer, FaProjectDiagram, FaRedo, FaUndo, FaLink, FaFileImage } from 'react-icons/fa';
 import { LayoutControls, LayoutAlgorithm } from './LayoutControls';
 import { ConnectionLineTypeControl } from './ConnectionLineTypeControl';
 import { ConnectionLineType } from '@xyflow/react';
@@ -16,6 +16,7 @@ interface SchemaToolbarProps {
   hasActiveProject?: boolean;
   onOpenConfig?: () => void;
   onCreateJoin?: () => void;
+  onPrint?: () => void;
   viewMode?: ViewMode;
   onViewModeChange?: (mode: ViewMode) => void;
 }
@@ -30,6 +31,7 @@ function SchemaToolbar({
   hasActiveProject,
   onOpenConfig,
   onCreateJoin,
+  onPrint,
 }: SchemaToolbarProps) {
   return (
     <div className="w-full h-10 align-top border-b overflow-y-hidden flex items-stretch justify-between">
@@ -76,9 +78,19 @@ function SchemaToolbar({
         </button>
       </div>
 
-      {/* Right: settings */}
-      {hasActiveProject && onOpenConfig && (
-        <div className="flex items-center px-2">
+      {/* Right: print + settings */}
+      <div className="flex items-center px-2 gap-1">
+        {onPrint && (
+          <button
+            onClick={onPrint}
+            title="Download diagram as PNG"
+            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300 flex items-center gap-1.5 text-xs"
+          >
+            <FaFileImage />
+            <span className="hidden sm:inline">Download PNG</span>
+          </button>
+        )}
+        {hasActiveProject && onOpenConfig && (
           <button
             onClick={onOpenConfig}
             title="Project settings"
@@ -87,8 +99,8 @@ function SchemaToolbar({
             <FaCog />
             <span className="hidden sm:inline">Settings</span>
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

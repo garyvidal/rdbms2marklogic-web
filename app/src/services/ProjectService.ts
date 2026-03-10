@@ -97,6 +97,8 @@ export interface SyntheticJoin {
 }
 
 export interface XmlColumnMapping {
+  /** Stable UUID — persists across renames. */
+  id?: string;
   sourceColumn: string;
   xmlName: string;
   xmlType: XmlSchemaType;
@@ -106,6 +108,8 @@ export interface XmlColumnMapping {
 }
 
 export interface XmlTableMapping {
+  /** Stable UUID — persists across renames. */
+  id?: string;
   sourceSchema: string;
   sourceTable: string;
   /** RootElement: the root element name. Elements/InlineElement: the child element name. CUSTOM: the output element name. */
@@ -115,7 +119,7 @@ export interface XmlTableMapping {
   wrapInParent: boolean;
   /** Elements only: outer wrapper element name, used when wrapInParent is true. */
   wrapperElementName?: string;
-  /** InlineElement: xmlName of the parent root/element this is nested inside. */
+  /** InlineElement: id of the parent XmlTableMapping this is nested inside. */
   parentRef?: string;
   /** CUSTOM: JavaScript function body that computes the element value from referenced fields. */
   customFunction?: string;
@@ -132,9 +136,12 @@ export interface ProjectMapping {
 }
 
 export interface ProjectData {
+  id?: string;
   name: string;
   version?: string;
   connectionName: string;
+  /** UUID-based connection reference (preferred over connectionName for new projects) */
+  connectionId?: string;
   created?: string;
   modified?: string;
   schemas: Record<string, ProjectSchema>;
@@ -156,8 +163,8 @@ export const saveProject = async (project: ProjectData): Promise<ProjectData> =>
   return response.json();
 };
 
-export const getProject = async (name: string): Promise<ProjectData> => {
-  const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(name)}`);
+export const getProject = async (idOrName: string): Promise<ProjectData> => {
+  const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(idOrName)}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch project: ${response.statusText}`);
   }
@@ -172,8 +179,8 @@ export const getProjects = async (): Promise<ProjectData[]> => {
   return response.json();
 };
 
-export const deleteProject = async (name: string): Promise<void> => {
-  const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(name)}`, {
+export const deleteProject = async (idOrName: string): Promise<void> => {
+  const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(idOrName)}`, {
     method: 'DELETE',
   });
   if (!response.ok) {

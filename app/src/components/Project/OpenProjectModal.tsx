@@ -24,12 +24,12 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onNewProj
       .finally(() => setLoading(false));
   }, []);
 
-  const handleDelete = async (projectName: string) => {
+  const handleDelete = async (project: ProjectData) => {
     setDeleting(true);
     try {
-      await deleteProject(projectName);
-      setProjects((prev) => prev.filter((p) => p.name !== projectName));
-      onDeleted?.(projectName);
+      await deleteProject(project.id ?? project.name);
+      setProjects((prev) => prev.filter((p) => p.name !== project.name));
+      onDeleted?.(project.name);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete project');
     } finally {
@@ -98,7 +98,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onNewProj
                     {isConfirming ? (
                       <div className="flex items-center gap-1 shrink-0">
                         <button
-                          onClick={() => handleDelete(project.name)}
+                          onClick={() => handleDelete(project)}
                           disabled={deleting}
                           className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white rounded transition disabled:opacity-50"
                         >

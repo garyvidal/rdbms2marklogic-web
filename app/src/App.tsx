@@ -9,12 +9,14 @@ import SchemaView from "./components/SchemaView/SchemaView";
 import Header from "./components/Layout/Header";
 import CreateProjectWizard from "./components/Project/CreateProjectWizard";
 import OpenProjectModal from "./components/Project/OpenProjectModal";
+import ConnectionsModal from "./components/Project/ConnectionsModal";
 import { ProjectData, DiagramContainer, getProject, saveProject } from "./services/ProjectService";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 
 export default function App() {
   const [showWizard, setShowWizard] = useState(false);
   const [showOpenModal, setShowOpenModal] = useState(true);
+  const [showConnectionsModal, setShowConnectionsModal] = useState(false);
   const [openProjects, setOpenProjects] = useState<ProjectData[]>([]);
   const [activeProjectName, setActiveProjectName] = useState<string | null>(null);
   const openProjectsRef = useRef<ProjectData[]>([]);
@@ -29,10 +31,10 @@ export default function App() {
     setShowOpenModal(false);
   };
 
-  const handleProjectSaved = async (projectName: string) => {
+  const handleProjectSaved = async (projectId: string) => {
     setShowWizard(false);
     try {
-      const project = await getProject(projectName);
+      const project = await getProject(projectId);
       openProject(project);
     } catch (e) {
       console.error('Failed to load saved project:', e);
@@ -98,6 +100,7 @@ export default function App() {
       <Header
         onNewProject={() => setShowWizard(true)}
         onOpenProject={() => setShowOpenModal(true)}
+        onConnections={() => setShowConnectionsModal(true)}
       />
       <SchemaView
         openProjects={openProjects}
@@ -122,6 +125,9 @@ export default function App() {
           onNewProject={() => setShowWizard(true)}
           alreadyOpenNames={openProjects.map((p) => p.name)}
         />
+      )}
+      {showConnectionsModal && (
+        <ConnectionsModal onClose={() => setShowConnectionsModal(false)} />
       )}
     </div>
   );

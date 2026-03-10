@@ -14,7 +14,7 @@ import ProjectPanel from "../Panels/ProjectPanel";
 import AddTablesModal from "../Project/AddTablesModal";
 import DatabaseConnectionForm from "../Project/DatabaseConnectionForm";
 import { ConfigDialog } from "../Project/ConfigDialog";
-import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, getConnection } from "@/services/SchemaService";
+import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, resolveConnection } from "@/services/SchemaService";
 import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/ProjectService";
 import SyntheticJoinDialog from "./SyntheticJoinDialog";
 import { convertCaseFromSetting } from "@/lib/CaseConverter";
@@ -187,6 +187,18 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const projectDbCache = useRef<Map<string, DbDatabase>>(new Map());
     const diagramSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isRestoringRef = useRef(false);
+    const diagramRef = useRef<HTMLDivElement>(null);
+
+    const handleExportPng = useCallback(async () => {
+        const el = diagramRef.current;
+        if (!el) return;
+        const { toPng } = await import('html-to-image');
+        const dataUrl = await toPng(el, { backgroundColor: '#0f172a', pixelRatio: 2 });
+        const link = document.createElement('a');
+        link.download = `${activeProjectRef.current?.name ?? 'diagram'}.png`;
+        link.href = dataUrl;
+        link.click();
+    }, []);
 
     const activeProject = openProjects.find((p) => p.name === activeProjectName) ?? null;
     const activeProjectRef = useRef<ProjectData | null>(activeProject);
@@ -299,17 +311,17 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         const nodeId = `${schemaName}.${tableName}`;
         if (nodes.some(n => n.id === nodeId)) return;
 
-        let db = projectDbCache.current.get(activeProject.connectionName);
+        let db = projectDbCache.current.get(activeProject.connectionId ?? activeProject.connectionName);
         if (!db) {
             try {
-                const savedConn = await getConnection(activeProject.connectionName);
+                const savedConn = await resolveConnection(activeProject.connectionId, activeProject.connectionName);
                 db = await analyzeSchema({
                     connection: savedConn.connection,
                     includeTables: true,
                     includeColumns: true,
                     includeRelationships: false,
                 });
-                projectDbCache.current.set(activeProject.connectionName, db);
+                projectDbCache.current.set(activeProject.connectionId ?? activeProject.connectionName, db);
             } catch (e) {
                 console.error("Failed to fetch schema for project:", e);
                 return;
@@ -548,6 +560,11 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         }
     };
 
+    const [leftCollapsed, setLeftCollapsed] = useState(false);
+    const [rightCollapsed, setRightCollapsed] = useState(false);
+
+    const RIBBON_WIDTH = 32;
+
     const { isDragging: isFileDragging, position: fileW, splitterProps: fileDragBarProps } = useResizable({
         axis: "x", initial: 250, min: 50,
     });
@@ -579,22 +596,6 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
     return (
         <>
-        {/* SVG marker definitions for crow's foot ER notation (one-to-many) */}
-        <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
-            <defs>
-                {/* Single bar at the "one" end (markerEnd / target side) */}
-                <marker id="crowsfoot-one" viewBox="-2 -2 8 20" refX="2" refY="8"
-                        markerWidth="4" markerHeight="16" orient="auto" overflow="visible">
-                    <line x1="2" y1="0" x2="2" y2="16" stroke="#94a3b8" strokeWidth="1.5"/>
-                </marker>
-                {/* Crow's foot at the "many" end (markerStart / source side) */}
-                <marker id="crowsfoot-many" viewBox="-2 -2 14 20" refX="0" refY="8"
-                        markerWidth="10" markerHeight="16" orient="auto-start-reverse" overflow="visible">
-                    <path d="M 0 8 L 10 0 M 0 8 L 10 8 M 0 8 L 10 16"
-                          stroke="#94a3b8" strokeWidth="1.5" fill="none"/>
-                </marker>
-            </defs>
-        </svg>
         <div className="relative flex-1 overflow-hidden flex">
             {showModal && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 rounded">
@@ -618,12 +619,19 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
             <div className="flex grow" style={{ opacity: showModal ? 0.3 : 1 }}>
                 <div
-                    className={cn("shrink-0 contents-top max-w-md", isFileDragging && "dragging")}
-                    style={{ width: fileW }}
+                    className={cn("shrink-0 contents-top", isFileDragging && "dragging")}
+                    style={{ width: leftCollapsed ? RIBBON_WIDTH : fileW }}
                 >
-                    <CollapsiblePanel title={leftPanelTitle} direction={"left"} body={leftPanelBody} />
+                    <CollapsiblePanel
+                        title={leftPanelTitle}
+                        direction="left"
+                        body={leftPanelBody}
+                        ribbonLabel="Schema Tables"
+                        collapsed={leftCollapsed}
+                        onToggle={() => setLeftCollapsed(v => !v)}
+                    />
                 </div>
-                <Splitter isDragging={isFileDragging} {...fileDragBarProps} />
+                {!leftCollapsed && <Splitter isDragging={isFileDragging} {...fileDragBarProps} />}
 
                 <div className="flex grow">
                     <div className="grow flex flex-col">
@@ -643,11 +651,26 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             hasActiveProject={!!activeProject}
                             onOpenConfig={() => setShowConfigDialog(true)}
                             onCreateJoin={activeProject ? () => setShowJoinDialog(true) : undefined}
+                            onPrint={nodes.length > 0 ? handleExportPng : undefined}
                             viewMode={viewMode}
                             onViewModeChange={activeProject ? setViewMode : undefined}
                         />
                         <div className="flex-1 relative overflow-hidden">
-                            <div className="absolute inset-0">
+                            <div className="absolute inset-0" ref={diagramRef}>
+                                {/* SVG marker definitions must live inside diagramRef so html-to-image captures them */}
+                                <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+                                    <defs>
+                                        <marker id="crowsfoot-one" viewBox="-2 -2 8 20" refX="2" refY="8"
+                                                markerWidth="4" markerHeight="16" orient="auto" overflow="visible">
+                                            <line x1="2" y1="0" x2="2" y2="16" stroke="#94a3b8" strokeWidth="1.5"/>
+                                        </marker>
+                                        <marker id="crowsfoot-many" viewBox="-2 -2 14 20" refX="0" refY="8"
+                                                markerWidth="10" markerHeight="16" orient="auto-start-reverse" overflow="visible">
+                                            <path d="M 0 8 L 10 0 M 0 8 L 10 8 M 0 8 L 10 16"
+                                                  stroke="#94a3b8" strokeWidth="1.5" fill="none"/>
+                                        </marker>
+                                    </defs>
+                                </svg>
                                 <ReactFlow
                                     nodes={nodes}
                                     edges={showEdges ? edges.map(e => {
@@ -657,7 +680,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                             type: connectionLineType,
                                             style: isSynthetic
                                                 ? { stroke: '#eab308', strokeWidth: 2 }
-                                                : undefined,
+                                                : { stroke: '#94a3b8', strokeWidth: 1.5 },
                                             markerEnd: isSynthetic
                                                 ? { type: 'arrowclosed' as const, color: '#eab308' }
                                                 : 'crowsfoot-one',
@@ -693,55 +716,62 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                         </div>
                     </div>
                     <>
-                    <Splitter isDragging={isPluginDragging} {...pluginDragBarProps} />
+                    {!rightCollapsed && <Splitter isDragging={isPluginDragging} {...pluginDragBarProps} />}
                     <div
-                        className={cn("shrink-0 contents-top max-w-md h-full overflow-hidden", isPluginDragging && "dragging")}
-                        style={{ width: pluginW }}
+                        className={cn("shrink-0 contents-top h-full overflow-hidden", isPluginDragging && "dragging")}
+                        style={{ width: rightCollapsed ? RIBBON_WIDTH : pluginW }}
                     >
-                        {activeProject ? (
-                            <DocumentModelView
-                                project={activeProject}
-                                pendingTable={pendingMappingTable}
-                                onPendingTableConsumed={() => setPendingMappingTable(null)}
-                                onMappingChange={handleMappingChange}
-                                highlightedTable={highlightedMappingTable}
-                                onHighlightedTableConsumed={() => setHighlightedMappingTable(null)}
-                            />
-                        ) : selectedTable ? (
-                            <div className="h-full w-full bg-slate-700 text-white overflow-auto">
-                                <div className="p-4 border-b border-slate-600">
-                                    <h3 className="font-semibold text-lg">{selectedTable.tableName}</h3>
-                                    <p className="text-sm text-gray-400">{selectedSchema?.name}</p>
-                                </div>
-                                {selectedTable.columns && Object.keys(selectedTable.columns).length > 0 && (
-                                    <div className="p-4">
-                                        <h4 className="font-semibold text-sm mb-3">
-                                            Columns ({Object.keys(selectedTable.columns).length})
-                                        </h4>
-                                        <div className="space-y-2">
-                                            {Object.values(selectedTable.columns).map((col) => (
-                                                <div key={col.name} className="text-xs bg-slate-600 p-2 rounded">
-                                                    <div className="font-mono font-semibold text-blue-300">{col.name}</div>
-                                                    <div className="text-gray-300">{col.type}</div>
-                                                    {col.columnType?.columnType && (
-                                                        <div className="text-gray-400">{col.columnType.columnType}</div>
-                                                    )}
-                                                    <div className="text-gray-500 text-xs mt-1">
-                                                        {col.primaryKey && <span className="bg-green-900 px-2 py-0.5 rounded mr-1">PK</span>}
-                                                        {col.foreignKey && <span className="bg-yellow-900 px-2 py-0.5 rounded mr-1">FK</span>}
-                                                        {col.sequence && <span className="bg-purple-900 px-2 py-0.5 rounded">AUTO</span>}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
+                        <CollapsiblePanel
+                            title="Document Mapping"
+                            direction="right"
+                            ribbonLabel="Document Mapping"
+                            collapsed={rightCollapsed}
+                            onToggle={() => setRightCollapsed(v => !v)}
+                            body={activeProject ? (
+                                <DocumentModelView
+                                    project={activeProject}
+                                    pendingTable={pendingMappingTable}
+                                    onPendingTableConsumed={() => setPendingMappingTable(null)}
+                                    onMappingChange={handleMappingChange}
+                                    highlightedTable={highlightedMappingTable}
+                                    onHighlightedTableConsumed={() => setHighlightedMappingTable(null)}
+                                />
+                            ) : selectedTable ? (
+                                <div className="h-full w-full bg-slate-700 text-white overflow-auto">
+                                    <div className="p-4 border-b border-slate-600">
+                                        <h3 className="font-semibold text-lg">{selectedTable.tableName}</h3>
+                                        <p className="text-sm text-gray-400">{selectedSchema?.name}</p>
                                     </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="h-full w-full bg-slate-700 text-gray-400 flex items-center justify-center flex-col gap-3">
-                                <p className="text-sm">Select a table to view details</p>
-                            </div>
-                        )}
+                                    {selectedTable.columns && Object.keys(selectedTable.columns).length > 0 && (
+                                        <div className="p-4">
+                                            <h4 className="font-semibold text-sm mb-3">
+                                                Columns ({Object.keys(selectedTable.columns).length})
+                                            </h4>
+                                            <div className="space-y-2">
+                                                {Object.values(selectedTable.columns).map((col) => (
+                                                    <div key={col.name} className="text-xs bg-slate-600 p-2 rounded">
+                                                        <div className="font-mono font-semibold text-blue-300">{col.name}</div>
+                                                        <div className="text-gray-300">{col.type}</div>
+                                                        {col.columnType?.columnType && (
+                                                            <div className="text-gray-400">{col.columnType.columnType}</div>
+                                                        )}
+                                                        <div className="text-gray-500 text-xs mt-1">
+                                                            {col.primaryKey && <span className="bg-green-900 px-2 py-0.5 rounded mr-1">PK</span>}
+                                                            {col.foreignKey && <span className="bg-yellow-900 px-2 py-0.5 rounded mr-1">FK</span>}
+                                                            {col.sequence && <span className="bg-purple-900 px-2 py-0.5 rounded">AUTO</span>}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="h-full w-full bg-slate-700 text-gray-400 flex items-center justify-center flex-col gap-3">
+                                    <p className="text-sm">Select a table to view details</p>
+                                </div>
+                            )}
+                        />
                     </div>
                     </>
                 </div>

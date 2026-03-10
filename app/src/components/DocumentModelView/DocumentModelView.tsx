@@ -52,6 +52,7 @@ function buildTableMapping(
     const tableColumns = project.schemas[schemaName]?.tables?.[tableName]?.columns ?? {};
 
     const columns: XmlColumnMapping[] = Object.values(tableColumns).map(col => ({
+        id: crypto.randomUUID(),
         sourceColumn: col.name,
         xmlName: convertCaseFromSetting(col.name, namingCase),
         xmlType: mapSqlTypeToXsd(col.type ?? ''),
@@ -59,6 +60,7 @@ function buildTableMapping(
     }));
 
     return {
+        id: crypto.randomUUID(),
         sourceSchema: schemaName,
         sourceTable: tableName,
         xmlName: convertCaseFromSetting(tableName, namingCase),
@@ -114,9 +116,10 @@ export default function DocumentModelView({
     }, [pendingTable]);
 
     // Options for inline-element parent selection: root + non-CUSTOM elements, with relationship check.
-    type ParentOption = { xmlName: string; label: string; sourceSchema: string; sourceTable: string; hasRelationship: boolean };
+    type ParentOption = { id: string; xmlName: string; label: string; sourceSchema: string; sourceTable: string; hasRelationship: boolean };
     const parentOptions: ParentOption[] = [
-        ...(root ? [{
+        ...(root?.id ? [{
+            id: root.id,
             xmlName: root.xmlName,
             label: `Root: <${root.xmlName}>`,
             sourceSchema: root.sourceSchema,
@@ -129,7 +132,9 @@ export default function DocumentModelView({
         }] : []),
         ...(elements ?? [])
             .filter(e => e.mappingType === 'Elements' || e.mappingType === 'InlineElement')
+            .filter(e => !!e.id)
             .map(e => ({
+                id: e.id!,
                 xmlName: e.xmlName,
                 label: `Element: <${e.xmlName}>`,
                 sourceSchema: e.sourceSchema,
@@ -169,7 +174,7 @@ export default function DocumentModelView({
 
     const handleInlineElementClick = () => {
         if (validParentOptions.length === 0) return;
-        setInlineParentRef(validParentOptions[0].xmlName);
+        setInlineParentRef(validParentOptions[0].id);
         setPopoverStep('inline-parent');
     };
 
@@ -203,6 +208,12 @@ export default function DocumentModelView({
             mapping: { documentModel: { root, elements: updated } },
         });
     }, [project, root, elements, onMappingChange]);
+
+    const resolveParentXmlName = (parentRef?: string): string | undefined => {
+        if (!parentRef) return undefined;
+        if (root?.id === parentRef) return root.xmlName;
+        return elements?.find(e => e.id === parentRef)?.xmlName;
+    };
 
     const hasMapping = root || (elements && elements.length > 0);
     const normalElements = (elements ?? []).filter(e => e.mappingType !== 'CUSTOM');
@@ -315,14 +326,14 @@ export default function DocumentModelView({
                                 <div className="space-y-1 mb-4">
                                     {parentOptions.map(p => (
                                         <button
-                                            key={p.xmlName}
-                                            onClick={() => p.hasRelationship && setInlineParentRef(p.xmlName)}
+                                            key={p.id}
+                                            onClick={() => p.hasRelationship && setInlineParentRef(p.id)}
                                             disabled={!p.hasRelationship}
                                             title={!p.hasRelationship ? 'No table relationship — create a synthetic join first' : undefined}
                                             className={`w-full text-left px-3 py-2 rounded border text-sm font-mono transition ${
                                                 !p.hasRelationship
                                                     ? 'border-slate-700 bg-slate-800/40 text-gray-600 cursor-not-allowed'
-                                                    : inlineParentRef === p.xmlName
+                                                    : inlineParentRef === p.id
                                                         ? 'border-violet-500 bg-violet-900/40 text-violet-200'
                                                         : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-400'
                                             }`}
@@ -343,7 +354,7 @@ export default function DocumentModelView({
                                     </button>
                                     <button
                                         onClick={() => handleAddMapping('InlineElement', inlineParentRef)}
-                                        disabled={!inlineParentRef || !validParentOptions.some(p => p.xmlName === inlineParentRef)}
+                                        disabled={!inlineParentRef || !validParentOptions.some(p => p.id === inlineParentRef)}
                                         className="flex-1 px-3 py-1.5 text-xs font-semibold rounded transition
                                             enabled:bg-violet-700 enabled:hover:bg-violet-600 enabled:text-white
                                             disabled:bg-slate-700 disabled:text-gray-600 disabled:cursor-not-allowed"
@@ -412,6 +423,7 @@ export default function DocumentModelView({
                                             mapping={el}
                                             onChange={handleCardChange}
                                             onRemove={() => handleRemoveElement(fullIndex)}
+                                            parentXmlName={el.mappingType === 'InlineElement' ? resolveParentXmlName(el.parentRef) : undefined}
                                         />
                                     </div>
                                 );

@@ -3,15 +3,17 @@ import {
   analyzeSchema,
   getSavedConnections,
   saveConnection,
-  deleteConnection,
   testConnection,
   DbConnection,
   DbDatabase,
   ConnectionType,
+  ConnectionEnvironment,
+  ENVIRONMENT_LABELS,
   SavedConnection,
 } from '@/services/SchemaService';
 import { saveProject } from '@/services/ProjectService';
-import { FaCheck, FaChevronRight, FaSpinner, FaTable, FaFolder, FaDatabase, FaTimes, FaTrash } from 'react-icons/fa';
+import EnvironmentBadge from './EnvironmentBadge';
+import { FaCheck, FaChevronRight, FaSpinner, FaTable, FaFolder, FaDatabase, FaTimes } from 'react-icons/fa';
 
 type ConnectionStatus = 'idle' | 'testing' | 'success' | 'failed';
 
@@ -55,19 +57,80 @@ const StepIndicator: React.FC<{ current: WizardStep }> = ({ current }) => {
   );
 };
 
-const defaultConnection: DbConnection = {
-  type: ConnectionType.Postgres,
-  url: 'localhost',
-  port: 55432,
-  database: 'northwind',
-  userName: 'postgres',
-  password: 'postgres',
+// ── New-connection form state ─────────────────────────────────────────────────
+
+interface NewConnForm {
+  id: string;
+  name: string;
+  environment: ConnectionEnvironment;
+  dbType: ConnectionType;
+  enterUriManually: boolean;
+  jdbcUri: string;
+  host: string;
+  port: string;
+  database: string;
+  username: string;
+  password: string;
+  authentication: 'Windows' | 'SqlServer';
+  identifier: 'ServiceName' | 'SID';
+  pdbName: string;
+  useSSL: boolean;
+  sslMode: 'Prefer' | 'Require' | 'VerifyCA' | 'VerifyFull';
+}
+
+const DEFAULT_PORTS: Record<ConnectionType, string> = {
+  [ConnectionType.Postgres]: '5432',
+  [ConnectionType.MySql]: '3306',
+  [ConnectionType.SqlServer]: '1433',
+  [ConnectionType.Oracle]: '1521',
 };
+
+const defaultNewConn = (): NewConnForm => ({
+  id: crypto.randomUUID(),
+  name: '',
+  environment: 'None',
+  dbType: ConnectionType.Postgres,
+  enterUriManually: false,
+  jdbcUri: '',
+  host: 'localhost',
+  port: DEFAULT_PORTS[ConnectionType.Postgres],
+  database: 'northwind',
+  username: 'postgres',
+  password: 'postgres',
+  authentication: 'SqlServer',
+  identifier: 'ServiceName',
+  pdbName: '',
+  useSSL: false,
+  sslMode: 'Prefer',
+});
+
+function formToDbConnection(f: NewConnForm): DbConnection {
+  return {
+    type: f.dbType,
+    enterUriManually: f.enterUriManually,
+    jdbcUri: f.enterUriManually ? f.jdbcUri : undefined,
+    url: f.host,
+    port: parseInt(f.port, 10) || 0,
+    database: f.database,
+    userName: f.username,
+    password: f.password,
+    authentication: f.dbType === ConnectionType.SqlServer ? f.authentication : undefined,
+    identifier: f.dbType === ConnectionType.Oracle ? f.identifier : undefined,
+    pdbName: f.dbType === ConnectionType.Oracle ? f.pdbName : undefined,
+    useSSL: f.dbType === ConnectionType.Postgres ? f.useSSL : undefined,
+    sslMode: f.dbType === ConnectionType.Postgres && f.useSSL ? f.sslMode : undefined,
+  };
+}
+
+// ── Wizard props ──────────────────────────────────────────────────────────────
 
 interface CreateProjectWizardProps {
   onClose: () => void;
-  onSaved: (projectName: string) => void;
+  onSaved: (projectId: string) => void;
 }
+
+const inputCls =
+  'w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
 const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSaved }) => {
   const [step, setStep] = useState<WizardStep>('name-connection');
@@ -76,9 +139,8 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
   const [projectName, setProjectName] = useState('');
   const [connectionMode, setConnectionMode] = useState<'saved' | 'new'>('saved');
   const [savedConnections, setSavedConnections] = useState<SavedConnection[]>([]);
-  const [selectedConnectionName, setSelectedConnectionName] = useState<string | null>(null);
-  const [newConnection, setNewConnection] = useState<DbConnection>(defaultConnection);
-  const [newConnectionName, setNewConnectionName] = useState('');
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [newConn, setNewConn] = useState<NewConnForm>(defaultNewConn);
   const [step1Error, setStep1Error] = useState<string | null>(null);
   const [connStatus, setConnStatus] = useState<ConnectionStatus>('idle');
   const [connTestMessage, setConnTestMessage] = useState<string | null>(null);
@@ -112,30 +174,27 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
     resetConnStatus();
   };
 
-  const handleSavedConnectionSelect = (name: string) => {
-    setSelectedConnectionName(name);
+  const handleNewConnChange = <K extends keyof NewConnForm>(key: K, value: NewConnForm[K]) => {
+    setNewConn((p) => ({ ...p, [key]: value }));
+    if (key !== 'password') resetConnStatus();
+  };
+
+  const handleDbTypeChange = (type: ConnectionType) => {
+    setNewConn((p) => ({ ...p, dbType: type, port: DEFAULT_PORTS[type] }));
     resetConnStatus();
   };
 
-  const handleNewConnectionChange = (field: keyof DbConnection, value: string | number) => {
-    setNewConnection((p) => ({ ...p, [field]: field === 'port' ? Number(value) || 0 : value }));
-    resetConnStatus();
-  };
 
-  const handleDeleteConnection = async (name: string) => {
-    try {
-      await deleteConnection(name);
-      const updated = savedConnections.filter((c) => c.name !== name);
-      setSavedConnections(updated);
-      if (selectedConnectionName === name) {
-        setSelectedConnectionName(null);
-        resetConnStatus();
-      }
-      if (updated.length === 0) setConnectionMode('new');
-    } catch (e) {
-      setStep1Error(e instanceof Error ? e.message : 'Failed to delete connection');
-    }
-  };
+  // Find by id first, fall back to name match (handles backends that don't return id)
+  const findSaved = (key: string | null) =>
+    key ? savedConnections.find((c) => c.id === key || c.name === key) ?? null : null;
+
+  const selectedSavedConn = findSaved(selectedConnectionId);
+
+  const effectiveConnection: DbConnection | null =
+    connectionMode === 'saved'
+      ? selectedSavedConn?.connection ?? null
+      : formToDbConnection(newConn);
 
   const handleTestConnection = async () => {
     const conn = effectiveConnection;
@@ -147,27 +206,32 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
     setConnTestMessage(result.message);
   };
 
-  const effectiveConnection: DbConnection | null =
-    connectionMode === 'saved'
-      ? savedConnections.find((c) => c.name === selectedConnectionName)?.connection ?? null
-      : newConnection;
-
-  const effectiveConnectionName: string =
-    connectionMode === 'saved' ? (selectedConnectionName ?? '') : newConnectionName;
-
-  // ── Step 1 → Step 2 ────────────────────────────────────────────────────────
+  // ── Step 1 → Step 2 ──────────────────────────────────────────────────────────
   const handleStep1Next = async () => {
     setStep1Error(null);
     if (!projectName.trim()) { setStep1Error('Enter a project name'); return; }
-    if (connectionMode === 'saved' && !selectedConnectionName) { setStep1Error('Select a saved connection'); return; }
+    if (connectionMode === 'saved' && !selectedConnectionId) { setStep1Error('Select a saved connection'); return; }
     if (connectionMode === 'new') {
-      if (!newConnectionName.trim()) { setStep1Error('Enter a name for the new connection'); return; }
-      if (!newConnection.url || !newConnection.database || !newConnection.userName) {
-        setStep1Error('Fill in all required connection fields (Host, Database, Username)');
-        return;
+      if (!newConn.name.trim()) { setStep1Error('Enter a name for the new connection'); return; }
+      if (!newConn.enterUriManually) {
+        if (!newConn.host || !newConn.database || !newConn.username) {
+          setStep1Error('Fill in all required connection fields (Host, Database, Username)');
+          return;
+        }
+      } else {
+        if (!newConn.jdbcUri) { setStep1Error('Enter a JDBC URI'); return; }
       }
       try {
-        await saveConnection({ name: newConnectionName, connection: newConnection });
+        const saved = await saveConnection({
+          id: newConn.id,
+          name: newConn.name,
+          environment: newConn.environment,
+          connection: formToDbConnection(newConn),
+        });
+        // Add to local list and switch to saved mode
+        setSavedConnections((prev) => [...prev, saved]);
+        setSelectedConnectionId(saved.id || saved.name);
+        setConnectionMode('saved');
       } catch (e) {
         setStep1Error(e instanceof Error ? e.message : 'Failed to save connection');
         return;
@@ -186,7 +250,6 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
         includeRelationships: true,
       });
       setDatabase(db);
-      // Pre-select all tables
       const initial: SelectedTables = {};
       for (const [schName, schema] of Object.entries(db.schemas)) {
         initial[schName] = new Set(Object.keys(schema.tables ?? {}));
@@ -199,7 +262,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
     }
   };
 
-  // ── Table selection helpers ─────────────────────────────────────────────────
+  // ── Table selection helpers ───────────────────────────────────────────────────
   const toggleTable = (schemaName: string, tableName: string) => {
     setSelectedTables((prev) => {
       const next = { ...prev };
@@ -223,7 +286,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
 
   const totalSelected = Object.values(selectedTables).reduce((sum, s) => sum + s.size, 0);
 
-  // ── Save project ────────────────────────────────────────────────────────────
+  // ── Save project ──────────────────────────────────────────────────────────────
   const handleSave = async () => {
     setSaving(true);
     setSaveError(null);
@@ -243,13 +306,17 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
         }
         schemas[schName] = { name: schName, tables };
       }
+      const conn = selectedSavedConn ?? savedConnections.find((c) => c.id === selectedConnectionId);
+      const id = crypto.randomUUID();
       await saveProject({
+        id,
         name: projectName,
         version: '1.0',
-        connectionName: effectiveConnectionName,
+        connectionId: conn?.id ?? selectedConnectionId ?? '',
+        connectionName: conn?.name ?? '',
         schemas,
       });
-      onSaved(projectName);
+      onSaved(id);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Failed to save project');
     } finally {
@@ -261,6 +328,10 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
     if (step === 'select-tables') setStep('name-connection');
     else if (step === 'review') setStep('select-tables');
   };
+
+  const isPostgres = newConn.dbType === ConnectionType.Postgres;
+  const isSqlServer = newConn.dbType === ConnectionType.SqlServer;
+  const isOracle = newConn.dbType === ConnectionType.Oracle;
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -311,62 +382,52 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                   </button>
                 </div>
 
+                {/* Saved connections dropdown */}
                 {connectionMode === 'saved' && (
-                  <div className="space-y-2 max-h-52 overflow-y-auto">
+                  <div className="space-y-2">
                     {savedConnections.length === 0 ? (
-                      <p className="text-sm text-gray-400 py-4 text-center">
+                      <p className="text-sm text-gray-400 py-2">
                         No saved connections — switch to "New Connection"
                       </p>
                     ) : (
-                      savedConnections.map((sc) => (
-                        <div
-                          key={sc.name}
-                          className={`flex items-center gap-2 p-3 rounded border transition ${selectedConnectionName === sc.name ? 'border-blue-500 bg-blue-900/40' : 'border-slate-600 bg-slate-700 hover:border-slate-500'}`}
+                      <>
+                        <select
+                          value={selectedConnectionId ?? ''}
+                          onChange={(e) => { setSelectedConnectionId(e.target.value || null); resetConnStatus(); }}
+                          className="w-full px-3 py-2 bg-slate-700 text-white border border-slate-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                          <button
-                            onClick={() => handleSavedConnectionSelect(sc.name)}
-                            className="flex items-center gap-3 flex-1 min-w-0 text-left"
-                          >
-                            <FaDatabase className={selectedConnectionName === sc.name ? 'text-blue-400' : 'text-gray-500'} />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-white">{sc.name}</div>
-                              <div className="text-xs text-gray-400 truncate">
-                                {sc.connection.type} @ {sc.connection.url}:{sc.connection.port} / {sc.connection.database}
-                              </div>
+                          <option value="">— Select a connection —</option>
+                          {savedConnections.map((sc) => (
+                            <option key={sc.id || sc.name} value={sc.id || sc.name}>{sc.name}</option>
+                          ))}
+                        </select>
+                        {selectedSavedConn && (
+                          <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 rounded text-xs text-gray-400">
+                            <FaDatabase className="text-blue-400 shrink-0" size={12} />
+                            <span className="truncate">
+                              {selectedSavedConn.connection.type} &bull; {selectedSavedConn.connection.url}:{selectedSavedConn.connection.port} / {selectedSavedConn.connection.database}
+                            </span>
+                            <div className="ml-auto shrink-0">
+                              <EnvironmentBadge environment={selectedSavedConn.environment} />
                             </div>
-                            {selectedConnectionName === sc.name && <FaCheck className="text-blue-400 shrink-0" size={12} />}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteConnection(sc.name)}
-                            className="text-red-400 hover:text-red-300 p-1.5 shrink-0 transition"
-                            title={`Delete "${sc.name}"`}
-                          >
-                            <FaTrash size={13} />
-                          </button>
-                        </div>
-                      ))
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
 
+                {/* New connection form */}
                 {connectionMode === 'new' && (
                   <div className="space-y-3 bg-slate-700 p-4 rounded">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">Connection Name *</label>
-                      <input
-                        type="text"
-                        value={newConnectionName}
-                        onChange={(e) => setNewConnectionName(e.target.value)}
-                        placeholder="my-database"
-                        className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+
+                    {/* Database Type */}
                     <div>
                       <label className="block text-xs font-medium text-gray-300 mb-1">Database Type</label>
                       <select
-                        value={newConnection.type}
-                        onChange={(e) => handleNewConnectionChange('type', e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={newConn.dbType}
+                        onChange={(e) => handleDbTypeChange(e.target.value as ConnectionType)}
+                        className={inputCls}
                       >
                         <option value={ConnectionType.Postgres}>PostgreSQL</option>
                         <option value={ConnectionType.MySql}>MySQL</option>
@@ -374,69 +435,214 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                         <option value={ConnectionType.Oracle}>Oracle</option>
                       </select>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+
+                    {/* Enter URI Manually */}
+                    <div className="flex items-center gap-3">
+                      <input
+                        id="newConn-uriManual"
+                        type="checkbox"
+                        checked={newConn.enterUriManually}
+                        onChange={(e) => handleNewConnChange('enterUriManually', e.target.checked)}
+                        className="accent-blue-500 w-4 h-4"
+                      />
+                      <label htmlFor="newConn-uriManual" className="text-sm text-gray-300 cursor-pointer">
+                        Enter URI Manually
+                      </label>
+                    </div>
+
+                    {/* JDBC URI */}
+                    {newConn.enterUriManually && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-300 mb-1">Host *</label>
+                        <label className="block text-xs font-medium text-gray-300 mb-1">JDBC URI *</label>
                         <input
                           type="text"
-                          value={newConnection.url}
-                          onChange={(e) => handleNewConnectionChange('url', e.target.value)}
-                          placeholder="localhost"
-                          className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          value={newConn.jdbcUri}
+                          onChange={(e) => handleNewConnChange('jdbcUri', e.target.value)}
+                          placeholder="jdbc:postgresql://localhost:5432/mydb"
+                          className={inputCls}
                         />
                       </div>
+                    )}
+
+                    {/* Host / Port */}
+                    {!newConn.enterUriManually && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">Host *</label>
+                          <input
+                            type="text"
+                            value={newConn.host}
+                            onChange={(e) => handleNewConnChange('host', e.target.value)}
+                            placeholder="localhost"
+                            className={inputCls}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">Port *</label>
+                          <input
+                            type="number"
+                            value={newConn.port}
+                            onChange={(e) => handleNewConnChange('port', e.target.value)}
+                            className={inputCls}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Database */}
+                    {!newConn.enterUriManually && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-300 mb-1">Port *</label>
+                        <label className="block text-xs font-medium text-gray-300 mb-1">Database *</label>
                         <input
-                          type="number"
-                          value={newConnection.port}
-                          onChange={(e) => handleNewConnectionChange('port', e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          type="text"
+                          value={newConn.database}
+                          onChange={(e) => handleNewConnChange('database', e.target.value)}
+                          placeholder="database"
+                          className={inputCls}
                         />
                       </div>
-                    </div>
+                    )}
+
+                    {/* Authentication (SQL Server) */}
+                    {isSqlServer && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-300 mb-1">Authentication</label>
+                        <select
+                          value={newConn.authentication}
+                          onChange={(e) => handleNewConnChange('authentication', e.target.value as 'Windows' | 'SqlServer')}
+                          className={inputCls}
+                        >
+                          <option value="Windows">Windows</option>
+                          <option value="SqlServer">SQL Server</option>
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Username / Password */}
+                    {!newConn.enterUriManually && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">Username *</label>
+                          <input
+                            type="text"
+                            value={newConn.username}
+                            onChange={(e) => handleNewConnChange('username', e.target.value)}
+                            className={inputCls}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">Password</label>
+                          <input
+                            type="password"
+                            value={newConn.password}
+                            onChange={(e) => handleNewConnChange('password', e.target.value)}
+                            className={inputCls}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Oracle: Identifier + PDB Name */}
+                    {isOracle && (
+                      <>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">Identifier</label>
+                          <select
+                            value={newConn.identifier}
+                            onChange={(e) => handleNewConnChange('identifier', e.target.value as 'ServiceName' | 'SID')}
+                            className={inputCls}
+                          >
+                            <option value="ServiceName">Service Name</option>
+                            <option value="SID">SID</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-300 mb-1">PDB Name</label>
+                          <input
+                            type="text"
+                            value={newConn.pdbName}
+                            onChange={(e) => handleNewConnChange('pdbName', e.target.value)}
+                            placeholder="Optional"
+                            className={inputCls}
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Postgres: SSL */}
+                    {isPostgres && (
+                      <div className="border border-slate-600 rounded p-3 space-y-2">
+                        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">SSL</div>
+                        <div className="flex items-center gap-3">
+                          <input
+                            id="newConn-useSSL"
+                            type="checkbox"
+                            checked={newConn.useSSL}
+                            onChange={(e) => handleNewConnChange('useSSL', e.target.checked)}
+                            className="accent-blue-500 w-4 h-4"
+                          />
+                          <label htmlFor="newConn-useSSL" className="text-sm text-gray-300 cursor-pointer">
+                            Use SSL
+                          </label>
+                        </div>
+                        {newConn.useSSL && (
+                          <div>
+                            <label className="block text-xs font-medium text-gray-300 mb-1">SSL Mode</label>
+                            <select
+                              value={newConn.sslMode}
+                              onChange={(e) => handleNewConnChange('sslMode', e.target.value as NewConnForm['sslMode'])}
+                              className={inputCls}
+                            >
+                              <option value="Prefer">Prefer</option>
+                              <option value="Require">Require</option>
+                              <option value="VerifyCA">Verify CA</option>
+                              <option value="VerifyFull">Verify Full</option>
+                            </select>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Divider */}
+                    <hr className="border-slate-600" />
+
+                    {/* Connection Name */}
                     <div>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">Database *</label>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">Connection Name *</label>
                       <input
                         type="text"
-                        value={newConnection.database}
-                        onChange={(e) => handleNewConnectionChange('database', e.target.value)}
-                        placeholder="database"
-                        className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={newConn.name}
+                        onChange={(e) => handleNewConnChange('name', e.target.value)}
+                        placeholder="my-database"
+                        className={inputCls}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-300 mb-1">Username *</label>
-                        <input
-                          type="text"
-                          value={newConnection.userName}
-                          onChange={(e) => handleNewConnectionChange('userName', e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-300 mb-1">Password</label>
-                        <input
-                          type="password"
-                          value={newConnection.password}
-                          onChange={(e) => handleNewConnectionChange('password', e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
+
+                    {/* Environment */}
+                    <div>
+                      <label className="block text-xs font-medium text-gray-300 mb-1">Environment</label>
+                      <select
+                        value={newConn.environment}
+                        onChange={(e) => handleNewConnChange('environment', e.target.value as ConnectionEnvironment)}
+                        className={inputCls}
+                      >
+                        {(Object.entries(ENVIRONMENT_LABELS) as [ConnectionEnvironment, string][]).map(([value, label]) => (
+                          <option key={value} value={value}>{label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Test Connection */}
-              {(connectionMode === 'new' || selectedConnectionName) && (
+              {(connectionMode === 'new' || selectedConnectionId) && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={handleTestConnection}
-                      disabled={connStatus === 'testing' || (connectionMode === 'saved' && !selectedConnectionName)}
+                      disabled={connStatus === 'testing' || (connectionMode === 'saved' && !selectedConnectionId)}
                       className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm rounded hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
                     >
                       {connStatus === 'testing' ? (
@@ -525,7 +731,9 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Connection</span>
-                  <span className="text-sm font-medium text-white">{effectiveConnectionName}</span>
+                  <span className="text-sm font-medium text-white">
+                    {selectedSavedConn?.name ?? newConn.name}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-400">Tables Selected</span>
@@ -617,7 +825,8 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
   );
 };
 
-// ── Schema tree node (extracted to handle indeterminate checkbox ref) ──────────
+// ── Schema tree node ──────────────────────────────────────────────────────────
+
 interface SchemaTreeNodeProps {
   schemaName: string;
   tableNames: string[];

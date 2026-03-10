@@ -7,13 +7,44 @@ export enum ConnectionType {
   Oracle = 'Oracle'
 }
 
+export type ConnectionEnvironment =
+  | 'ContinuousIntegration'
+  | 'Development'
+  | 'Staging'
+  | 'QA_UAT'
+  | 'Production'
+  | 'None';
+
+export const ENVIRONMENT_LABELS: Record<ConnectionEnvironment, string> = {
+  ContinuousIntegration: 'Continuous Integration',
+  Development: 'Development',
+  Staging: 'Staging',
+  QA_UAT: 'QA UAT',
+  Production: 'Production',
+  None: 'None',
+};
+
 export interface DbConnection {
   type: ConnectionType;
+  /** When true, use jdbcUri directly instead of host/port/database fields */
+  enterUriManually?: boolean;
+  jdbcUri?: string;
   url: string;
   port: number;
   database: string;
   userName: string;
-  password: string;
+  /** Plaintext when sending to the backend; null/undefined when received (password is never returned). */
+  password?: string | null;
+  /** SQL Server only */
+  authentication?: 'Windows' | 'SqlServer';
+  /** Oracle only */
+  identifier?: 'ServiceName' | 'SID';
+  /** Oracle only */
+  pdbName?: string;
+  /** Postgres only */
+  useSSL?: boolean;
+  /** Postgres only, when useSSL is true */
+  sslMode?: 'Prefer' | 'Require' | 'VerifyCA' | 'VerifyFull';
 }
 
 export interface SchemaAnalysisRequest {
@@ -67,6 +98,18 @@ export interface ConnectionTestResult {
 }
 
 /**
+ * Strip frontend-only fields before sending DbConnection to any backend API.
+ * When enterUriManually is true, the jdbcUri becomes the url.
+ */
+function toApiConnection(conn: DbConnection): Omit<DbConnection, 'enterUriManually' | 'jdbcUri'> {
+  const { enterUriManually, jdbcUri, ...rest } = conn;
+  if (enterUriManually && jdbcUri) {
+    return { ...rest, url: jdbcUri };
+  }
+  return rest;
+}
+
+/**
  * Test a database connection without saving it
  */
 export const testConnection = async (connection: DbConnection): Promise<ConnectionTestResult> => {
@@ -74,7 +117,7 @@ export const testConnection = async (connection: DbConnection): Promise<Connecti
     const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/connections/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(connection),
+      body: JSON.stringify(toApiConnection(connection)),
     });
     if (!response.ok) {
       throw new Error(`Server error: ${response.statusText}`);
@@ -95,7 +138,7 @@ export const analyzeSchema = async (request: SchemaAnalysisRequest): Promise<DbD
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request),
+      body: JSON.stringify({ ...request, connection: toApiConnection(request.connection) }),
     });
     if (!response.ok) {
       throw new Error(`Failed to analyze schema: ${response.statusText}`);
@@ -141,12 +184,16 @@ export const fetchTablesForSchema = async (
 };
 
 export interface SaveConnectionRequest {
+  id: string;
   name: string;
+  environment?: ConnectionEnvironment;
   connection: DbConnection;
 }
 
 export interface SavedConnection {
+  id: string;
   name: string;
+  environment?: ConnectionEnvironment;
   connection: DbConnection;
 }
 
@@ -189,7 +236,7 @@ export const getSavedConnections = async (): Promise<SavedConnection[]> => {
 };
 
 /**
- * Get a specific saved connection
+ * Get a specific saved connection by name (legacy path-based lookup)
  */
 export const getConnection = async (name: string): Promise<SavedConnection> => {
   try {
@@ -205,7 +252,26 @@ export const getConnection = async (name: string): Promise<SavedConnection> => {
 };
 
 /**
- * Delete a saved connection
+ * Resolve a connection by id or name (id takes priority).
+ * Use this when a project may have either connectionId or connectionName.
+ */
+export const resolveConnection = async (
+  connectionId?: string,
+  connectionName?: string
+): Promise<SavedConnection> => {
+  if (connectionId) {
+    const all = await getSavedConnections();
+    const found = all.find((c) => c.id === connectionId);
+    if (found) return found;
+  }
+  if (connectionName) {
+    return getConnection(connectionName);
+  }
+  throw new Error('No connection identifier provided');
+};
+
+/**
+ * Delete a saved connection by name
  */
 export const deleteConnection = async (name: string): Promise<void> => {
   try {
@@ -218,5 +284,60 @@ export const deleteConnection = async (name: string): Promise<void> => {
   } catch (error) {
     console.error(`Error deleting connection ${name}:`, error);
     throw error;
+  }
+};
+
+/**
+ * Delete a saved connection by id
+ */
+export const deleteConnectionById = async (id: string): Promise<void> => {
+  const all = await getSavedConnections();
+  const conn = all.find((c) => c.id === id);
+  if (!conn) throw new Error(`Connection not found: ${id}`);
+  return deleteConnection(conn.name);
+};
+
+/**
+ * Update a saved connection via PUT.
+ * If request.connection.password is blank the backend retains the existing stored password.
+ */
+export const updateConnection = async (
+  originalName: string,
+  request: SaveConnectionRequest
+): Promise<SavedConnection> => {
+  try {
+    const response = await fetch(
+      `${SCHEMA_SERVICE_URL}/v1/connections/${encodeURIComponent(originalName)}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to update connection: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating connection:', error);
+    throw error;
+  }
+};
+
+/**
+ * Test a saved connection using its stored credentials (no password required from client).
+ */
+export const testConnectionById = async (id: string): Promise<ConnectionTestResult> => {
+  try {
+    const response = await fetch(
+      `${SCHEMA_SERVICE_URL}/v1/connections/${encodeURIComponent(id)}/test`,
+      { method: 'POST' }
+    );
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : 'Connection test failed' };
   }
 };

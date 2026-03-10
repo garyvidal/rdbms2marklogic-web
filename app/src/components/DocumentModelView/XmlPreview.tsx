@@ -17,7 +17,7 @@ function renderTableToLines(
 
     const attrCols   = table.columns.filter(c => c.mappingType === 'ElementAttribute');
     const elemCols   = table.columns.filter(c => c.mappingType !== 'ElementAttribute');
-    const inlineKids = inlinesByParent.get(table.xmlName) ?? [];
+    const inlineKids = inlinesByParent.get(table.id ?? '') ?? [];
     const topKids    = childElements ?? [];
     const normalKids = topKids.filter(e => e.mappingType !== 'CUSTOM');
     const customKids = topKids.filter(e => e.mappingType === 'CUSTOM');
@@ -77,6 +77,7 @@ function generateXml(documentModel: ProjectMapping['documentModel']): string {
             inlinesByParent.set(el.parentRef, arr);
         }
     }
+
 
     const topLevelChildren = allElements.filter(e => e.mappingType !== 'InlineElement');
 
