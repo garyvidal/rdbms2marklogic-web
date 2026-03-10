@@ -22,6 +22,7 @@ const AddTablesModal: React.FC<AddTablesModalProps> = ({ project, onClose, onTab
       try {
         const savedConn = await resolveConnection(project.connectionId, project.connectionName);
         const db = await analyzeSchema({
+          connectionId: savedConn.id,
           connection: savedConn.connection,
           includeTables: true,
           includeColumns: true,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ConnectionType, DbConnection, saveConnection } from '@/services/SchemaService';
+import { ConnectionType, DbConnection, encryptPassword, saveConnection } from '@/services/SchemaService';
 import { FaDatabase, FaEye, FaEyeSlash } from 'react-icons/fa';
 import SavedConnectionsList from './SavedConnectionsList';
 
@@ -60,9 +60,13 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
       setSaving(true);
       setError(null);
       
+      const connToSave = { ...connection };
+      if (connToSave.password) {
+        connToSave.password = await encryptPassword(connToSave.password);
+      }
       await saveConnection({
         name: connectionName,
-        connection,
+        connection: connToSave,
       });
       
       setConnectionName('');

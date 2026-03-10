@@ -316,6 +316,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
             try {
                 const savedConn = await resolveConnection(activeProject.connectionId, activeProject.connectionName);
                 db = await analyzeSchema({
+                    connectionId: savedConn.id,
                     connection: savedConn.connection,
                     includeTables: true,
                     includeColumns: true,

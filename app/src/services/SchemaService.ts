@@ -48,6 +48,8 @@ export interface DbConnection {
 }
 
 export interface SchemaAnalysisRequest {
+  /** When set, the backend resolves credentials from the stored connection — no password needed. */
+  connectionId?: string;
   connection: DbConnection;
   includeTables: boolean;
   includeColumns: boolean;
@@ -110,14 +112,34 @@ function toApiConnection(conn: DbConnection): Omit<DbConnection, 'enterUriManual
 }
 
 /**
+ * Encrypts a password using the backend's AES-256-GCM key.
+ * Returns the same string if it is already encrypted (ENC: prefix).
+ */
+export const encryptPassword = async (plaintext: string): Promise<string> => {
+  if (!plaintext) return plaintext;
+  const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/encrypt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value: plaintext }),
+  });
+  if (!response.ok) throw new Error('Failed to encrypt password');
+  const data = await response.json();
+  return data.encrypted as string;
+};
+
+/**
  * Test a database connection without saving it
  */
 export const testConnection = async (connection: DbConnection): Promise<ConnectionTestResult> => {
   try {
+    const conn = toApiConnection(connection);
+    if (conn.password) {
+      conn.password = await encryptPassword(conn.password);
+    }
     const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/connections/test`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(toApiConnection(connection)),
+      body: JSON.stringify(conn),
     });
     if (!response.ok) {
       throw new Error(`Server error: ${response.statusText}`);
@@ -133,12 +155,16 @@ export const testConnection = async (connection: DbConnection): Promise<Connecti
  */
 export const analyzeSchema = async (request: SchemaAnalysisRequest): Promise<DbDatabase> => {
   try {
+    const conn = toApiConnection(request.connection);
+    if (conn.password) {
+      conn.password = await encryptPassword(conn.password);
+    }
     const response = await fetch(`${SCHEMA_SERVICE_URL}/v1/schemas`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...request, connection: toApiConnection(request.connection) }),
+      body: JSON.stringify({ ...request, connection: conn }),
     });
     if (!response.ok) {
       throw new Error(`Failed to analyze schema: ${response.statusText}`);

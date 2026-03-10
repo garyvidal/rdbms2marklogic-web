@@ -6,6 +6,7 @@ import {
   deleteConnection,
   testConnection,
   testConnectionById,
+  encryptPassword,
   SavedConnection,
   DbConnection,
   ConnectionType,
@@ -188,11 +189,15 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
     setSaving(true);
     setError(null);
     try {
+      const conn = formToConnection(form);
+      if (conn.password) {
+        conn.password = await encryptPassword(conn.password);
+      }
       const request = {
         id: form.id,
         name: form.name.trim(),
         environment: form.environment,
-        connection: formToConnection(form),
+        connection: conn,
       };
       const saved = initial
         ? await updateConnection(originalName, request)

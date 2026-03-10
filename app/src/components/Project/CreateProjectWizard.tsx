@@ -4,6 +4,7 @@ import {
   getSavedConnections,
   saveConnection,
   testConnection,
+  testConnectionById,
   DbConnection,
   DbDatabase,
   ConnectionType,
@@ -197,11 +198,11 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
       : formToDbConnection(newConn);
 
   const handleTestConnection = async () => {
-    const conn = effectiveConnection;
-    if (!conn) return;
     setConnStatus('testing');
     setConnTestMessage(null);
-    const result = await testConnection(conn);
+    const result = (connectionMode === 'saved' && selectedSavedConn)
+      ? await testConnectionById(selectedSavedConn.id)
+      : await testConnection(effectiveConnection!);
     setConnStatus(result.success ? 'success' : 'failed');
     setConnTestMessage(result.message);
   };
@@ -242,9 +243,9 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
     setLoadingSchemas(true);
     setSchemaError(null);
     try {
-      const conn = effectiveConnection!;
       const db = await analyzeSchema({
-        connection: conn,
+        connectionId: selectedSavedConn?.id,
+        connection: effectiveConnection!,
         includeTables: true,
         includeColumns: true,
         includeRelationships: true,

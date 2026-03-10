@@ -30,7 +30,9 @@
       "Bash(git mv app/src/styles/schema-view.css app/src/styles/SchemaView.css)",
       "Bash(git mv app/src/styles/splitter.css app/src/styles/Splitter.css)",
       "Bash(xargs grep -l \"XmlColumnMapping\\\\|XmlTableMapping\")",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "Bash(mvn clean:*)",
+      "Bash(./mvnw clean:*)"
     ]
   }
 }
