@@ -11,9 +11,9 @@ import {
   DbConnection,
   ConnectionType,
   ConnectionEnvironment,
-  ENVIRONMENT_LABELS,
 } from '@/services/SchemaService';
 import EnvironmentBadge from './EnvironmentBadge';
+import EnvironmentSelect from './EnvironmentSelect';
 import {
   FaDatabase,
   FaPlus,
@@ -426,19 +426,10 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
 
         {/* Environment */}
         <Field label="Environment">
-          <select
+          <EnvironmentSelect
             value={form.environment}
-            onChange={(e) => set('environment', e.target.value as ConnectionEnvironment)}
-            className={inputCls}
-          >
-            {(Object.entries(ENVIRONMENT_LABELS) as [ConnectionEnvironment, string][]).map(
-              ([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              )
-            )}
-          </select>
+            onChange={(env) => set('environment', env)}
+          />
         </Field>
 
         {/* Test Connection */}

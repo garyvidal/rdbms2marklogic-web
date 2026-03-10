@@ -500,6 +500,26 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         setShowJoinDialog(false);
     }, [activeProject, nodes, onProjectSchemasUpdated]);
 
+    const displayedEdges = useMemo(() => {
+        if (!showEdges) return [];
+        return edges.map(e => {
+            const isSynthetic = e.id.startsWith('synth-');
+            return {
+                ...e,
+                type: connectionLineType,
+                style: isSynthetic
+                    ? { stroke: '#eab308', strokeWidth: 2 }
+                    : { stroke: '#94a3b8', strokeWidth: 1.5 },
+                markerEnd: isSynthetic
+                    ? { type: 'arrowclosed' as const, color: '#eab308' }
+                    : 'crowsfoot-one',
+                markerStart: isSynthetic
+                    ? undefined
+                    : 'crowsfoot-many',
+            };
+        });
+    }, [edges, showEdges, connectionLineType]);
+
     const handleMappingChange = useCallback(async (updatedProject: ProjectData) => {
         try {
             await saveProject(updatedProject);
@@ -674,22 +694,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                 </svg>
                                 <ReactFlow
                                     nodes={nodes}
-                                    edges={showEdges ? edges.map(e => {
-                                        const isSynthetic = e.id.startsWith('synth-');
-                                        return {
-                                            ...e,
-                                            type: connectionLineType,
-                                            style: isSynthetic
-                                                ? { stroke: '#eab308', strokeWidth: 2 }
-                                                : { stroke: '#94a3b8', strokeWidth: 1.5 },
-                                            markerEnd: isSynthetic
-                                                ? { type: 'arrowclosed' as const, color: '#eab308' }
-                                                : 'crowsfoot-one',
-                                            markerStart: isSynthetic
-                                                ? undefined
-                                                : 'crowsfoot-many',
-                                        };
-                                    }) : []}
+                                    edges={displayedEdges}
                                     onNodesChange={onNodesChange}
                                     onEdgesChange={onEdgesChange}
                                     nodeTypes={nodeTypes}
@@ -701,6 +706,8 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                     onNodeDragStop={handleNodeDragStop}
                                     onPaneClick={() => { setContextMenu(null); setEdgeContextMenu(null); setHighlightedMappingTable(null); }}
                                     connectionLineType={connectionLineType}
+                                    selectionKeyCode={null}
+                                    selectNodesOnDrag={false}
                                 >
                                     <Controls />
                                     <MiniMap />

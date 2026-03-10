@@ -3,7 +3,6 @@ import * as React from "react";
 import { useState } from "react";
 import { TableBody, TableCell, TableRow } from "@/components/ui/Table";
 import { BaseNode } from "./BaseNode";
-import { LabeledHandle } from "./LabeledHandle";
 
 type DatabaseSchemaNode = Node<{
   label: string;
@@ -55,30 +54,15 @@ export function DatabaseSchemaNode({
             {data.schema.map((entry) => (
               <TableRow key={entry.title} className="relative text-xs">
                 <TableCell className="pl-4 pr-6 font-light flex items-center gap-1">
-                  <LabeledHandle
-                    id={entry.title}
-                    title={entry.title}
-                    type="target"
-                    position={Position.Left}
-                  >
-                    {entry.primaryKey && (
-                      <span title="Primary Key" className="text-yellow-400 mr-1 ml-1">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11v2a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4v-2"/><path d="M7 7v4"/><circle cx="7" cy="7" r="4"/></svg>
-                      </span>
-                    )}
-                    
-                  </LabeledHandle>
+                  {entry.primaryKey && (
+                    <span title="Primary Key" className="text-yellow-400 mr-1">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11v2a4 4 0 0 0 4 4h0a4 4 0 0 0 4-4v-2"/><path d="M7 7v4"/><circle cx="7" cy="7" r="4"/></svg>
+                    </span>
+                  )}
+                  {entry.title}
                 </TableCell>
                 <TableCell className="pr-4 text-right font-thin">
-                  <LabeledHandle
-                    id={entry.title}
-                    title={entry.type}
-                    type="source"
-                    position={Position.Right}
-                    className="p-0"
-                    handleClassName="p-0"
-                    labelClassName="p-0"
-                  />
+                  {entry.type}
                 </TableCell>
               </TableRow>
             ))}
