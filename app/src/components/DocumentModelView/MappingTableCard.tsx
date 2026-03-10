@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FaTimes, FaTag, FaLayerGroup, FaLink, FaGripVertical, FaChevronDown, FaChevronUp, FaPlus, FaDatabase } from 'react-icons/fa';
-import type { XmlTableMapping, ColumnMappingType, XmlSchemaType } from '@/services/projectService';
+import type { XmlTableMapping, ColumnMappingType, XmlSchemaType } from '@/services/ProjectService';
 
 // ── FunctionTextarea: textarea with field-name autocomplete ───────────────────
 
@@ -132,7 +132,9 @@ const XML_TYPE_COLOR: Record<XmlSchemaType, string> = {
     'xs:long':     'bg-purple-900 text-purple-300',
     'xs:date':     'bg-green-900 text-green-300',
     'xs:dateTime': 'bg-green-900 text-green-300',
-    'xs:boolean':  'bg-yellow-900 text-yellow-300',
+    'xs:boolean':   'bg-yellow-900 text-yellow-300',
+    'xs:decimal':   'bg-purple-900 text-purple-300',
+    'xs:hexBinary': 'bg-orange-900 text-orange-300',
 };
 
 const MAPPING_TYPE_LABELS: Record<ColumnMappingType, string> = {
@@ -208,7 +210,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove }: Mappin
         onChange({ ...mapping, columns: cols });
     };
 
-    const XSD_TYPES: XmlSchemaType[] = ['xs:string', 'xs:integer', 'xs:long', 'xs:date', 'xs:dateTime', 'xs:boolean'];
+    const XSD_TYPES: XmlSchemaType[] = ['xs:string', 'xs:integer', 'xs:long', 'xs:decimal', 'xs:date', 'xs:dateTime', 'xs:boolean','xs:hexBinary'];
 
     /** DB column names available as `fields.X` in custom functions */
     const availableFieldNames = mapping.columns

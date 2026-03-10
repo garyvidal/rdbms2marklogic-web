@@ -2,14 +2,14 @@
 
 import { useState, useRef, useCallback } from "react";
 import '@xyflow/react/dist/style.css';
-import '@/styles/schema-view.css';
-import '@/styles/splitter.css';
+import '@/styles/SchemaView.css';
+import '@/styles/Splitter.css';
 
 import SchemaView from "./components/SchemaView/SchemaView";
-import Header from "./components/Header";
-import CreateProjectWizard from "./components/CreateProjectWizard";
-import OpenProjectModal from "./components/OpenProjectModal";
-import { ProjectData, DiagramContainer, getProject, saveProject } from "./services/projectService";
+import Header from "./components/Layout/Header";
+import CreateProjectWizard from "./components/Project/CreateProjectWizard";
+import OpenProjectModal from "./components/Project/OpenProjectModal";
+import { ProjectData, DiagramContainer, getProject, saveProject } from "./services/ProjectService";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 
 export default function App() {

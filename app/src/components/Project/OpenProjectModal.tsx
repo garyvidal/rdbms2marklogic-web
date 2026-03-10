@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaFolderOpen, FaTimes, FaTrash, FaPlus } from 'react-icons/fa';
-import { ProjectData, getProjects, deleteProject } from '@/services/projectService';
+import { ProjectData, getProjects, deleteProject } from '@/services/ProjectService';
 
 interface OpenProjectModalProps {
   onOpen: (project: ProjectData) => void;

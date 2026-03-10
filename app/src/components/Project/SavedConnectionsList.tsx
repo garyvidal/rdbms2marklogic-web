@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getSavedConnections, deleteConnection, SavedConnection, DbConnection } from '@/services/schemaService';
+import { getSavedConnections, deleteConnection, SavedConnection, DbConnection } from '@/services/SchemaService';
 import { FaTrash, FaSpinner, FaLink } from 'react-icons/fa';
 
 interface SavedConnectionsListProps {

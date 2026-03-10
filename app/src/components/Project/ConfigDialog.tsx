@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { ConnectionLineType } from '@xyflow/react';
-import { NamingCase, ProjectSettings } from '@/services/projectService';
+import { NamingCase, ProjectSettings } from '@/services/ProjectService';
 
 const NAMING_CASES: { value: NamingCase; label: string; example: string }[] = [
     { value: 'SNAKE',  label: 'Snake case',  example: 'my_field_name' },

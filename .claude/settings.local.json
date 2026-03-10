@@ -17,7 +17,18 @@
       "Bash(npx tsc --noEmit)",
       "Bash(npx vite build)",
       "Bash(xargs grep -l \"DocumentModel\\\\|DocumentMapping\")",
-      "Bash(grep -o \".\\\\{0,200\\\\}getMarkerId.\\\\{0,500\\\\}\")"
+      "Bash(grep -o \".\\\\{0,200\\\\}getMarkerId.\\\\{0,500\\\\}\")",
+      "Bash(git mv app/src/components/ProjectPanel.tsx app/src/components/Panels/ProjectPanel.tsx)",
+      "Bash(git mv app/src/components/SchemasPanel.tsx app/src/components/Panels/SchemasPanel.tsx)",
+      "Bash(git mv app/src/components/TablesList.tsx app/src/components/Panels/TablesList.tsx)",
+      "Bash(git mv app/src/components/ui/table.tsx app/src/components/ui/Table.tsx)",
+      "Bash(git mv app/src/lib/caseConverter.ts app/src/lib/CaseConverter.ts)",
+      "Bash(git mv app/src/lib/typeMapper.ts app/src/lib/TypeMapper.ts)",
+      "Bash(git mv app/src/lib/utils.ts app/src/lib/Utils.ts)",
+      "Bash(git mv app/src/services/projectService.ts app/src/services/ProjectService.ts)",
+      "Bash(git mv app/src/services/schemaService.ts app/src/services/SchemaService.ts)",
+      "Bash(git mv app/src/styles/schema-view.css app/src/styles/SchemaView.css)",
+      "Bash(git mv app/src/styles/splitter.css app/src/styles/Splitter.css)"
     ]
   }
 }

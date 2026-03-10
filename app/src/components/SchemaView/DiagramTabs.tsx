@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
-import { cn } from "@/lib/utils";
-import { ProjectData } from "@/services/projectService";
+import { cn } from "@/lib/Utils";
+import { ProjectData } from "@/services/ProjectService";
 
 interface DiagramTabsProps {
   projects: ProjectData[];

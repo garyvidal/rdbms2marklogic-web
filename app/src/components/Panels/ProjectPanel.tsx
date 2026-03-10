@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ProjectData } from '@/services/projectService';
+import { ProjectData } from '@/services/ProjectService';
 import { FaChevronDown, FaChevronRight, FaTable, FaFolder, FaEye, FaPlus, FaCheck } from 'react-icons/fa';
 
 interface ProjectPanelProps {

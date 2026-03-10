@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { FaFileCode, FaPlus, FaCode } from 'react-icons/fa';
+import { FaFileCode, FaCode } from 'react-icons/fa';
+import XmlPreview from './XmlPreview';
 import type {
     ProjectData,
     ProjectMapping,
     XmlTableMapping,
     XmlColumnMapping,
-    XmlSchemaType,
     TableMappingType,
-} from '@/services/projectService';
+} from '@/services/ProjectService';
 
 /** Returns true if there is an FK relationship or synthetic join between two tables (in either direction). */
 function hasTableRelationship(
@@ -25,10 +25,9 @@ function hasTableRelationship(
         (j.sourceSchema === b.schema && j.sourceTable === b.table && j.targetSchema === a.schema && j.targetTable === a.table),
     );
 }
-import { convertCaseFromSetting } from '@/lib/caseConverter';
-import { mapSqlTypeToXsd } from '@/lib/typeMapper';
+import { convertCaseFromSetting } from '@/lib/CaseConverter';
+import { mapSqlTypeToXsd } from '@/lib/TypeMapper';
 import MappingTableCard from './MappingTableCard';
-import CustomElementDialog from './CustomElementDialog';
 
 interface DocumentModelViewProps {
     project: ProjectData;
@@ -101,11 +100,10 @@ export default function DocumentModelView({
         onHighlightedTableConsumed?.();
     }, [highlightedTable]);
 
+    const [showPreview, setShowPreview] = useState(false);
     const [showPopover, setShowPopover] = useState(false);
     const [popoverStep, setPopoverStep] = useState<PopoverStep>('type');
     const [inlineParentRef, setInlineParentRef] = useState<string>('');
-    const [showCustomDialog, setShowCustomDialog] = useState(false);
-
     // Show the popover whenever a new pending table arrives.
     React.useEffect(() => {
         if (pendingTable) {
@@ -175,24 +173,6 @@ export default function DocumentModelView({
         setPopoverStep('inline-parent');
     };
 
-    const handleAddCustom = useCallback((xmlName: string, xmlType: XmlSchemaType, cols: XmlColumnMapping[], customFunction: string) => {
-        const customMap: XmlTableMapping = {
-            sourceSchema: '',
-            sourceTable: '',
-            xmlName,
-            mappingType: 'CUSTOM',
-            wrapInParent: false,
-            columns: cols,
-            customFunction,
-            xmlType,
-        };
-        onMappingChange({
-            ...project,
-            mapping: { documentModel: { root, elements: [...(elements ?? []), customMap] } },
-        });
-        setShowCustomDialog(false);
-    }, [project, root, elements, onMappingChange]);
-
     const handleCardChange = useCallback((updated: XmlTableMapping) => {
         let updatedDocModel: ProjectMapping['documentModel'];
         if (updated.mappingType === 'RootElement' && root?.sourceTable === updated.sourceTable && root?.sourceSchema === updated.sourceSchema) {
@@ -247,17 +227,23 @@ export default function DocumentModelView({
                     {hasMapping && (
                         <span className="text-xs text-gray-500">{elementCountLabel}</span>
                     )}
-                    <button
-                        onClick={() => setShowCustomDialog(true)}
-                        title="Add a custom computed element"
-                        className="flex items-center gap-1 px-2 py-1 text-xs rounded border border-amber-700 bg-amber-900/20 text-amber-300 hover:bg-amber-900/50 hover:border-amber-500 transition"
-                    >
-                        <FaPlus size={9} />
-                        <FaCode size={9} />
-                        Custom
-                    </button>
+                    {hasMapping && (
+                        <button
+                            onClick={() => setShowPreview(true)}
+                            title="Preview generated XML"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-600 text-gray-400 hover:border-cyan-500 hover:text-cyan-300 hover:bg-cyan-900/20 transition"
+                        >
+                            <FaCode size={10} />
+                            Preview XML
+                        </button>
+                    )}
                 </div>
             </div>
+
+            {/* XML Preview overlay */}
+            {showPreview && (
+                <XmlPreview mapping={mapping} onClose={() => setShowPreview(false)} />
+            )}
 
             {/* Popover: choose mapping type */}
             {showPopover && pendingTable && (
@@ -369,15 +355,6 @@ export default function DocumentModelView({
                         )}
                     </div>
                 </div>
-            )}
-
-            {/* Custom element dialog */}
-            {showCustomDialog && (
-                <CustomElementDialog
-                    mapping={mapping}
-                    onConfirm={handleAddCustom}
-                    onCancel={() => setShowCustomDialog(false)}
-                />
             )}
 
             {/* Main content */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ConnectionType, DbConnection, saveConnection } from '@/services/schemaService';
+import { ConnectionType, DbConnection, saveConnection } from '@/services/SchemaService';
 import { FaDatabase, FaEye, FaEyeSlash } from 'react-icons/fa';
 import SavedConnectionsList from './SavedConnectionsList';
 

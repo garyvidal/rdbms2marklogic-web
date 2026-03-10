@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { analyzeSchema, getConnection, DbDatabase } from '@/services/schemaService';
-import { ProjectData, saveProject } from '@/services/projectService';
+import { analyzeSchema, getConnection, DbDatabase } from '@/services/SchemaService';
+import { ProjectData, saveProject } from '@/services/ProjectService';
 import { FaFolder, FaSpinner, FaTable } from 'react-icons/fa';
 
 interface AddTablesModalProps {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes, FaPlus, FaCode } from 'react-icons/fa';
-import type { ProjectMapping, XmlColumnMapping, XmlSchemaType } from '@/services/projectService';
+import type { ProjectMapping, XmlColumnMapping, XmlSchemaType } from '@/services/ProjectService';
 
 const XSD_TYPES: XmlSchemaType[] = ['xs:string', 'xs:integer', 'xs:long', 'xs:date', 'xs:dateTime', 'xs:boolean'];
 

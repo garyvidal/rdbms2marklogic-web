@@ -2,24 +2,24 @@ import { ReactFlow, MiniMap, Background, Controls, useNodesState, useEdgesState,
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import * as ReactDOM from "react-dom";
 import * as dagreNS from "@dagrejs/dagre";
-import Splitter from "../splitter";
+import Splitter from "../Layout/Splitter";
 import { useResizable } from "react-resizable-layout";
-import { cn } from "@/lib/utils";
-import CollapsiblePanel from "../CollapsiblePanel";
+import { cn } from "@/lib/Utils";
+import CollapsiblePanel from "../Layout/CollapsiblePanel";
 import SchemaToolbar, { ViewMode } from "./SchemaToolbar";
 import DiagramTabs from "./DiagramTabs";
 import DocumentModelView from "../DocumentModelView/DocumentModelView";
-import SchemasPanel from "../SchemasPanel";
-import ProjectPanel from "../ProjectPanel";
-import AddTablesModal from "../AddTablesModal";
-import DatabaseConnectionForm from "../DatabaseConnectionForm";
-import { ConfigDialog } from "../ConfigDialog";
-import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, getConnection } from "@/services/schemaService";
-import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/projectService";
+import SchemasPanel from "../Panels/SchemasPanel";
+import ProjectPanel from "../Panels/ProjectPanel";
+import AddTablesModal from "../Project/AddTablesModal";
+import DatabaseConnectionForm from "../Project/DatabaseConnectionForm";
+import { ConfigDialog } from "../Project/ConfigDialog";
+import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, getConnection } from "@/services/SchemaService";
+import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/ProjectService";
 import SyntheticJoinDialog from "./SyntheticJoinDialog";
-import { convertCaseFromSetting } from "@/lib/caseConverter";
+import { convertCaseFromSetting } from "@/lib/CaseConverter";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
-import { DatabaseSchemaNode } from "../DatabaseSchemaNode";
+import { DatabaseSchemaNode } from "../Nodes/DatabaseSchemaNode";
 import { LayoutAlgorithm } from "./LayoutControls";
 
 // Vite pre-bundles @dagrejs/dagre as a default-only export; unwrap if needed
@@ -560,7 +560,9 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         ? <ProjectPanel
             project={activeProject}
             onTableSelect={handleProjectTableSelect}
-            onTableMappingRequest={(t: string, s: string) => setPendingMappingTable({ tableName: t, schemaName: s })}
+            onTableMappingRequest={viewMode === 'document'
+                ? (t: string, s: string) => setPendingMappingTable({ tableName: t, schemaName: s })
+                : undefined}
             visibleNodeIds={visibleNodeIds}
             onAddTables={() => setShowAddTablesModal(true)}
             mappedTableKeys={mappedTableKeys.size > 0 ? mappedTableKeys : undefined}

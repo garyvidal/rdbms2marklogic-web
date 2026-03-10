@@ -1,9 +1,9 @@
 import { Node, NodeProps, Position, Handle, useReactFlow } from "@xyflow/react";
 import * as React from "react";
 import { useState } from "react";
-import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { BaseNode } from "@/components/base-node";
-import { LabeledHandle } from "@/components/labeled-handle";
+import { TableBody, TableCell, TableRow } from "@/components/ui/Table";
+import { BaseNode } from "./BaseNode";
+import { LabeledHandle } from "./LabeledHandle";
 
 type DatabaseSchemaNode = Node<{
   label: string;

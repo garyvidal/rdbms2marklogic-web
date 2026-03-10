@@ -1,4 +1,4 @@
-import type { XmlSchemaType } from '@/services/projectService';
+import type { XmlSchemaType } from '@/services/ProjectService';
 
 /**
  * Maps a SQL/JDBC column type string to the closest XSD type.
@@ -21,7 +21,7 @@ export function mapSqlTypeToXsd(sqlType: string): XmlSchemaType {
     if(/^(REAL|FLOAT|DOUBLE|DOUBLE PRECISION|DECIMAL|NUMERIC|MONEY)$/.test(t)) {
         return 'xs:decimal';
     }
-    if(/^(TEXT|CLOB|JSON|XML)$/.test(t)) {
+    if(/^(TEXT|CLOB|JSON|XML|BINARY)$/.test(t)) {
         return 'xs:hexBinary';
     }
     return 'xs:string';

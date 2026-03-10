@@ -6,7 +6,7 @@ import {
   getSavedConnections,
   SavedConnection,
   DbConnection,
-} from '@/services/schemaService';
+} from '@/services/SchemaService';
 import { FaChevronDown, FaChevronRight, FaTable, FaDatabase } from 'react-icons/fa';
 
 interface SchemaPanelProps {

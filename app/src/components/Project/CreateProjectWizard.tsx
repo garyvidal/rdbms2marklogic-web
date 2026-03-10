@@ -9,8 +9,8 @@ import {
   DbDatabase,
   ConnectionType,
   SavedConnection,
-} from '@/services/schemaService';
-import { saveProject } from '@/services/projectService';
+} from '@/services/SchemaService';
+import { saveProject } from '@/services/ProjectService';
 import { FaCheck, FaChevronRight, FaSpinner, FaTable, FaFolder, FaDatabase, FaTimes, FaTrash } from 'react-icons/fa';
 
 type ConnectionStatus = 'idle' | 'testing' | 'success' | 'failed';

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import * as ReactDOM from 'react-dom';
 import { FaTimes, FaLink, FaPlus } from 'react-icons/fa';
-import type { ProjectData, SyntheticJoin, JoinCondition, JoinType } from '@/services/projectService';
+import type { ProjectData, SyntheticJoin, JoinCondition, JoinType } from '@/services/ProjectService';
 
 // ── SQL type family ───────────────────────────────────────────────────────────
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchTables, Table } from '@/services/schemaService';
+import { fetchTables, Table } from '@/services/SchemaService';
 import { FaTable, FaSpinner } from 'react-icons/fa';
 
 interface TablesListProps {
