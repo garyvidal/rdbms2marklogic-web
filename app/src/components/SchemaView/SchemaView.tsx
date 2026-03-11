@@ -153,12 +153,13 @@ interface SchemaViewProps {
     activeProjectName: string | null;
     onProjectSelect: (name: string) => void;
     onProjectClose: (name: string) => void;
+    onProjectRename?: (oldName: string, newName: string) => void;
     onDiagramChange?: (projectName: string, nodes: ReactFlowNode[], edges: ReactFlowEdge[]) => void;
     onProjectSchemasUpdated?: (project: ProjectData) => void;
     onProjectSettingsUpdated?: (project: ProjectData) => void;
 }
 
-const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjectClose, onDiagramChange, onProjectSchemasUpdated, onProjectSettingsUpdated }: SchemaViewProps): JSX.Element => {
+const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjectClose, onProjectRename, onDiagramChange, onProjectSchemasUpdated, onProjectSettingsUpdated }: SchemaViewProps): JSX.Element => {
     const [selectedTable, setSelectedTable] = useState<DbTable | null>(null);
     const [selectedSchema, setSelectedSchema] = useState<DbSchema | null>(null);
     const [database, setDatabase] = useState<DbDatabase | null>(null);
@@ -661,6 +662,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             activeProjectName={activeProjectName}
                             onProjectSelect={onProjectSelect}
                             onProjectClose={onProjectClose}
+                            onProjectRename={onProjectRename}
                         />
                         <SchemaToolbar
                             hasNodes={nodes.length > 0}
