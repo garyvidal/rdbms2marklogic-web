@@ -10,6 +10,7 @@ import Header from "./components/Layout/Header";
 import CreateProjectWizard from "./components/Project/CreateProjectWizard";
 import OpenProjectModal from "./components/Project/OpenProjectModal";
 import ConnectionsModal from "./components/Project/ConnectionsModal";
+import MarkLogicConnectionsModal from "./components/Project/MarkLogicConnectionsModal";
 import { ProjectData, DiagramContainer, getProject, saveProject } from "./services/ProjectService";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 
@@ -17,6 +18,7 @@ export default function App() {
   const [showWizard, setShowWizard] = useState(false);
   const [showOpenModal, setShowOpenModal] = useState(true);
   const [showConnectionsModal, setShowConnectionsModal] = useState(false);
+  const [showMarkLogicModal, setShowMarkLogicModal] = useState(false);
   const [openProjects, setOpenProjects] = useState<ProjectData[]>([]);
   const [activeProjectName, setActiveProjectName] = useState<string | null>(null);
   const openProjectsRef = useRef<ProjectData[]>([]);
@@ -101,6 +103,7 @@ export default function App() {
         onNewProject={() => setShowWizard(true)}
         onOpenProject={() => setShowOpenModal(true)}
         onConnections={() => setShowConnectionsModal(true)}
+        onMarkLogicConnections={() => setShowMarkLogicModal(true)}
       />
       <SchemaView
         openProjects={openProjects}
@@ -128,6 +131,9 @@ export default function App() {
       )}
       {showConnectionsModal && (
         <ConnectionsModal onClose={() => setShowConnectionsModal(false)} />
+      )}
+      {showMarkLogicModal && (
+        <MarkLogicConnectionsModal onClose={() => setShowMarkLogicModal(false)} />
       )}
     </div>
   );

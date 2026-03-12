@@ -187,3 +187,24 @@ export const deleteProject = async (idOrName: string): Promise<void> => {
     throw new Error(`Failed to delete project: ${response.statusText}`);
   }
 };
+
+export interface XmlPreviewResponse {
+  documents: string[];
+  totalRows: number;
+  errors: string[];
+}
+
+export const generateXmlPreview = async (projectId: string, limit: number = 10): Promise<XmlPreviewResponse> => {
+  const response = await fetch(
+    `${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(projectId)}/generate/preview`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ limit }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to generate preview: ${response.statusText}`);
+  }
+  return response.json();
+};

@@ -14,6 +14,7 @@ import ProjectPanel from "../Panels/ProjectPanel";
 import AddTablesModal from "../Project/AddTablesModal";
 import DatabaseConnectionForm from "../Project/DatabaseConnectionForm";
 import { ConfigDialog } from "../Project/ConfigDialog";
+import GenerateXmlModal from "../Project/GenerateXmlModal";
 import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, resolveConnection } from "@/services/SchemaService";
 import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/ProjectService";
 import SyntheticJoinDialog from "./SyntheticJoinDialog";
@@ -173,6 +174,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const [edgeContextMenu, setEdgeContextMenu] = useState<{ edgeId: string; x: number; y: number } | null>(null);
     const [showAddTablesModal, setShowAddTablesModal] = useState(false);
     const [showConfigDialog, setShowConfigDialog] = useState(false);
+    const [showGenerateModal, setShowGenerateModal] = useState(false);
     const [pendingCasingUpdate, setPendingCasingUpdate] = useState<{
         settings: ProjectSettings;
         lineType: ConnectionLineType;
@@ -673,6 +675,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             onConnectionLineTypeChange={setConnectionLineType}
                             hasActiveProject={!!activeProject}
                             onOpenConfig={() => setShowConfigDialog(true)}
+                            onGenerateXml={activeProject ? () => setShowGenerateModal(true) : undefined}
                             onCreateJoin={activeProject ? () => setShowJoinDialog(true) : undefined}
                             onPrint={nodes.length > 0 ? handleExportPng : undefined}
                             viewMode={viewMode}
@@ -795,6 +798,14 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                 connectionLineType={connectionLineType}
                 onSave={handleConfigSave}
                 onClose={() => setShowConfigDialog(false)}
+            />
+        )}
+
+        {showGenerateModal && activeProject?.id && (
+            <GenerateXmlModal
+                projectId={activeProject.id}
+                projectName={activeProject.name}
+                onClose={() => setShowGenerateModal(false)}
             />
         )}
 

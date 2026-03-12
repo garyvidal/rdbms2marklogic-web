@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FaCog, FaMousePointer, FaProjectDiagram, FaRedo, FaUndo, FaLink, FaFileImage } from 'react-icons/fa';
+import { FaCog, FaCode, FaMousePointer, FaProjectDiagram, FaRedo, FaUndo, FaLink, FaFileImage } from 'react-icons/fa';
 import { LayoutControls, LayoutAlgorithm } from './LayoutControls';
 import { ConnectionLineTypeControl } from './ConnectionLineTypeControl';
 import { ConnectionLineType } from '@xyflow/react';
@@ -15,6 +15,7 @@ interface SchemaToolbarProps {
   onConnectionLineTypeChange: (type: ConnectionLineType) => void;
   hasActiveProject?: boolean;
   onOpenConfig?: () => void;
+  onGenerateXml?: () => void;
   onCreateJoin?: () => void;
   onPrint?: () => void;
   viewMode?: ViewMode;
@@ -30,6 +31,7 @@ function SchemaToolbar({
   onConnectionLineTypeChange,
   hasActiveProject,
   onOpenConfig,
+  onGenerateXml,
   onCreateJoin,
   onPrint,
 }: SchemaToolbarProps) {
@@ -88,6 +90,16 @@ function SchemaToolbar({
           >
             <FaFileImage />
             <span className="hidden sm:inline">Download PNG</span>
+          </button>
+        )}
+        {hasActiveProject && onGenerateXml && (
+          <button
+            onClick={onGenerateXml}
+            title="Generate XML documents from mapping"
+            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 text-xs"
+          >
+            <FaCode />
+            <span className="hidden sm:inline">Generate XML</span>
           </button>
         )}
         {hasActiveProject && onOpenConfig && (

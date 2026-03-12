@@ -211,7 +211,7 @@ const TOKEN_CLASS: Record<TokenKind, string> = {
     'ws':          '',
 };
 
-function HighlightedXml({ xml }: { xml: string }) {
+export function HighlightedXml({ xml }: { xml: string }) {
     const lines = xml.split('\n');
     return (
         <code className="text-xs font-mono leading-5 block">
