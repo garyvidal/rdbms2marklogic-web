@@ -1,6 +1,9 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { FaFileCode, FaCode } from 'react-icons/fa';
+import { SiJson } from 'react-icons/si';
 import XmlPreview from './XmlPreview';
+import JsonPreview from './JsonPreview';
+import JsonDocumentModelView from './JsonDocumentModelView';
 import type {
     ProjectData,
     ProjectMapping,
@@ -102,6 +105,17 @@ export default function DocumentModelView({
         onHighlightedTableConsumed?.();
     }, [highlightedTable]);
 
+    const mappingType = project.mapping?.mappingType ?? 'XML';
+    const showBothTabs = mappingType === 'BOTH';
+    const showJsonOnly = mappingType === 'JSON';
+    const [activeTab, setActiveTab] = useState<'xml' | 'json'>(showJsonOnly ? 'json' : 'xml');
+
+    // Sync activeTab when mappingType changes (e.g. project switch or settings change).
+    React.useEffect(() => {
+        if (showJsonOnly) setActiveTab('json');
+        else if (!showBothTabs) setActiveTab('xml');
+    }, [showJsonOnly, showBothTabs]);
+
     const [showPreview, setShowPreview] = useState(false);
     const [showPopover, setShowPopover] = useState(false);
     const [popoverStep, setPopoverStep] = useState<PopoverStep>('type');
@@ -160,7 +174,7 @@ export default function DocumentModelView({
             updatedDocModel = { root, elements: [...(elements ?? []), newMap] };
         }
 
-        onMappingChange({ ...project, mapping: { documentModel: updatedDocModel } });
+        onMappingChange({ ...project, mapping: { ...project.mapping, documentModel: updatedDocModel } });
         setShowPopover(false);
         setPopoverStep('type');
         onPendingTableConsumed();
@@ -191,13 +205,13 @@ export default function DocumentModelView({
                 ),
             };
         }
-        onMappingChange({ ...project, mapping: { documentModel: updatedDocModel } });
+        onMappingChange({ ...project, mapping: { ...project.mapping, documentModel: updatedDocModel } });
     }, [project, root, elements, onMappingChange]);
 
     const handleRemoveRoot = useCallback(() => {
         onMappingChange({
             ...project,
-            mapping: { documentModel: { root: undefined, elements: elements ?? [] } },
+            mapping: { ...project.mapping, documentModel: { root: undefined, elements: elements ?? [] } },
         });
     }, [project, elements, onMappingChange]);
 
@@ -205,7 +219,7 @@ export default function DocumentModelView({
         const updated = (elements ?? []).filter((_, i) => i !== index);
         onMappingChange({
             ...project,
-            mapping: { documentModel: { root, elements: updated } },
+            mapping: { ...project.mapping, documentModel: { root, elements: updated } },
         });
     }, [project, root, elements, onMappingChange]);
 
@@ -225,6 +239,57 @@ export default function DocumentModelView({
         customElements.length > 0 ? `${customElements.length} custom` : '',
     ].filter(Boolean).join(', ');
 
+    // When the JSON tab is active, delegate rendering to JsonDocumentModelView
+    if ((showJsonOnly || showBothTabs) && activeTab === 'json') {
+        return (
+            <div className="flex flex-col h-full bg-slate-800 text-white relative overflow-hidden">
+                {/* Header bar with tabs */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-600 shrink-0">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
+                        <FaFileCode size={14} className="text-cyan-400" />
+                        Document Model
+                        <span className="text-xs text-gray-500">— {project.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {showBothTabs && (
+                            <div className="flex items-center gap-1 bg-slate-900 rounded p-0.5">
+                                <button onClick={() => setActiveTab('xml')}
+                                    className="px-3 py-1 text-xs rounded text-gray-400 hover:text-white transition">
+                                    XML
+                                </button>
+                                <button className="px-3 py-1 text-xs rounded bg-slate-600 text-white">
+                                    JSON
+                                </button>
+                            </div>
+                        )}
+                        {!showBothTabs && (
+                            <span className="text-xs text-gray-500 font-mono">JSON</span>
+                        )}
+                        <button
+                            onClick={() => setShowPreview(true)}
+                            title="Preview generated JSON"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-600 text-gray-400 hover:border-amber-500 hover:text-amber-300 hover:bg-amber-900/20 transition"
+                        >
+                            <SiJson size={10} />
+                            Preview JSON
+                        </button>
+                    </div>
+                </div>
+                <JsonDocumentModelView
+                    project={project}
+                    pendingTable={pendingTable}
+                    onPendingTableConsumed={onPendingTableConsumed}
+                    onMappingChange={onMappingChange}
+                    highlightedTable={highlightedTable}
+                    onHighlightedTableConsumed={onHighlightedTableConsumed}
+                />
+                {showPreview && (
+                    <JsonPreview mapping={mapping} onClose={() => setShowPreview(false)} />
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-full bg-slate-800 text-white relative overflow-hidden">
             {/* Header bar */}
@@ -235,6 +300,17 @@ export default function DocumentModelView({
                     <span className="text-xs text-gray-500">— {project.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
+                    {showBothTabs && (
+                        <div className="flex items-center gap-1 bg-slate-900 rounded p-0.5">
+                            <button className="px-3 py-1 text-xs rounded bg-slate-600 text-white">
+                                XML
+                            </button>
+                            <button onClick={() => setActiveTab('json')}
+                                className="px-3 py-1 text-xs rounded text-gray-400 hover:text-white transition">
+                                JSON
+                            </button>
+                        </div>
+                    )}
                     {hasMapping && (
                         <span className="text-xs text-gray-500">{elementCountLabel}</span>
                     )}

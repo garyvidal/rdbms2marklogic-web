@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as ReactDOM from 'react-dom';
 import { ConnectionLineType } from '@xyflow/react';
-import { NamingCase, ProjectSettings } from '@/services/ProjectService';
+import { MappingTargetType, NamingCase, ProjectSettings } from '@/services/ProjectService';
 
 const NAMING_CASES: { value: NamingCase; label: string; example: string }[] = [
     { value: 'SNAKE',  label: 'Snake case',  example: 'my_field_name' },
@@ -18,20 +18,28 @@ const LINE_TYPES: { value: ConnectionLineType; label: string }[] = [
     { value: ConnectionLineType.SimpleBezier, label: 'Simple Bezier' },
 ];
 
+const MAPPING_TYPES: { value: MappingTargetType; label: string; description: string }[] = [
+    { value: 'XML',  label: 'XML',      description: 'Generate XML documents only' },
+    { value: 'JSON', label: 'JSON',     description: 'Generate JSON documents only' },
+    { value: 'BOTH', label: 'XML + JSON', description: 'Generate both XML and JSON documents' },
+];
+
 interface ConfigDialogProps {
     projectName: string;
     settings: ProjectSettings;
     connectionLineType: ConnectionLineType;
-    onSave: (settings: ProjectSettings, connectionLineType: ConnectionLineType) => void;
+    mappingType: MappingTargetType;
+    onSave: (settings: ProjectSettings, connectionLineType: ConnectionLineType, mappingType: MappingTargetType) => void;
     onClose: () => void;
 }
 
-export function ConfigDialog({ projectName, settings, connectionLineType, onSave, onClose }: ConfigDialogProps) {
+export function ConfigDialog({ projectName, settings, connectionLineType, mappingType, onSave, onClose }: ConfigDialogProps) {
     const [defaultCasing, setDefaultCasing] = useState<NamingCase>(settings.defaultCasing ?? 'SNAKE');
     const [lineType, setLineType] = useState<ConnectionLineType>(connectionLineType);
+    const [selectedMappingType, setSelectedMappingType] = useState<MappingTargetType>(mappingType ?? 'XML');
 
     const handleSave = () => {
-        onSave({ ...settings, defaultCasing, connectionLineType: lineType }, lineType);
+        onSave({ ...settings, defaultCasing, connectionLineType: lineType }, lineType, selectedMappingType);
     };
 
     const dialog = (
@@ -51,6 +59,32 @@ export function ConfigDialog({ projectName, settings, connectionLineType, onSave
                 </div>
 
                 <div className="px-6 py-5 space-y-5">
+                    {/* Mapping Type */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                            Document Mapping Type
+                        </label>
+                        <p className="text-xs text-gray-400 mb-3">
+                            Choose which document format(s) to generate from this project's relational data.
+                        </p>
+                        <div className="flex gap-2">
+                            {MAPPING_TYPES.map(mt => (
+                                <button
+                                    key={mt.value}
+                                    onClick={() => setSelectedMappingType(mt.value)}
+                                    title={mt.description}
+                                    className={`flex-1 px-3 py-2 rounded border text-sm font-medium transition ${
+                                        selectedMappingType === mt.value
+                                            ? 'border-cyan-500 bg-cyan-900/30 text-cyan-200'
+                                            : 'border-slate-600 bg-slate-800 text-gray-400 hover:border-slate-500 hover:text-gray-200'
+                                    }`}
+                                >
+                                    {mt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                     {/* Default Casing */}
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">

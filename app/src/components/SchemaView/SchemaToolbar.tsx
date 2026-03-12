@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { FaCog, FaCode, FaMousePointer, FaProjectDiagram, FaRedo, FaUndo, FaLink, FaFileImage } from 'react-icons/fa';
+import { SiJson } from 'react-icons/si';
 import { LayoutControls, LayoutAlgorithm } from './LayoutControls';
 import { ConnectionLineTypeControl } from './ConnectionLineTypeControl';
 import { ConnectionLineType } from '@xyflow/react';
+import type { MappingTargetType } from '@/services/ProjectService';
 
 export type ViewMode = 'relational' | 'document';
 
@@ -16,6 +18,8 @@ interface SchemaToolbarProps {
   hasActiveProject?: boolean;
   onOpenConfig?: () => void;
   onGenerateXml?: () => void;
+  onGenerateJson?: () => void;
+  mappingType?: MappingTargetType;
   onCreateJoin?: () => void;
   onPrint?: () => void;
   viewMode?: ViewMode;
@@ -32,9 +36,13 @@ function SchemaToolbar({
   hasActiveProject,
   onOpenConfig,
   onGenerateXml,
+  onGenerateJson,
+  mappingType = 'XML',
   onCreateJoin,
   onPrint,
 }: SchemaToolbarProps) {
+  const showXmlButton  = hasActiveProject && onGenerateXml  && (mappingType === 'XML'  || mappingType === 'BOTH');
+  const showJsonButton = hasActiveProject && onGenerateJson && (mappingType === 'JSON' || mappingType === 'BOTH');
   return (
     <div className="w-full h-10 align-top border-b overflow-y-hidden flex items-stretch justify-between">
 
@@ -92,7 +100,7 @@ function SchemaToolbar({
             <span className="hidden sm:inline">Download PNG</span>
           </button>
         )}
-        {hasActiveProject && onGenerateXml && (
+        {showXmlButton && (
           <button
             onClick={onGenerateXml}
             title="Generate XML documents from mapping"
@@ -100,6 +108,16 @@ function SchemaToolbar({
           >
             <FaCode />
             <span className="hidden sm:inline">Generate XML</span>
+          </button>
+        )}
+        {showJsonButton && (
+          <button
+            onClick={onGenerateJson}
+            title="Generate JSON documents from mapping"
+            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-amber-400 hover:text-amber-300 flex items-center gap-1.5 text-xs"
+          >
+            <SiJson />
+            <span className="hidden sm:inline">Generate JSON</span>
           </button>
         )}
         {hasActiveProject && onOpenConfig && (

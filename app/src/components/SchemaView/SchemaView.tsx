@@ -15,6 +15,7 @@ import AddTablesModal from "../Project/AddTablesModal";
 import DatabaseConnectionForm from "../Project/DatabaseConnectionForm";
 import { ConfigDialog } from "../Project/ConfigDialog";
 import GenerateXmlModal from "../Project/GenerateXmlModal";
+import GenerateJsonModal from "../Project/GenerateJsonModal";
 import { DbTable, DbSchema, DbDatabase, DbConnection, SchemaAnalysisRequest, analyzeSchema, resolveConnection } from "@/services/SchemaService";
 import { ProjectData, ProjectSettings, ProjectMapping, XmlTableMapping, SyntheticJoin, saveProject } from "@/services/ProjectService";
 import SyntheticJoinDialog from "./SyntheticJoinDialog";
@@ -133,7 +134,7 @@ function LayoutApplier({ pendingLayout, edges, setNodes, setEdges, onDone }: Lay
 
 /** Rebuild all xmlName fields in a mapping using a new project naming case. */
 function remapAllNames(mapping: ProjectMapping, newCasing: string): ProjectMapping {
-    const remapTable = (t: XmlTableMapping): XmlTableMapping => ({
+    const remapXmlTable = (t: XmlTableMapping): XmlTableMapping => ({
         ...t,
         xmlName: convertCaseFromSetting(t.sourceTable, newCasing),
         columns: t.columns.map(col => ({
@@ -141,11 +142,24 @@ function remapAllNames(mapping: ProjectMapping, newCasing: string): ProjectMappi
             xmlName: convertCaseFromSetting(col.sourceColumn, newCasing),
         })),
     });
+    const remapJsonTable = (t: import('@/services/ProjectService').JsonTableMapping): import('@/services/ProjectService').JsonTableMapping => ({
+        ...t,
+        jsonName: convertCaseFromSetting(t.sourceTable, newCasing),
+        columns: t.columns.map(col => ({
+            ...col,
+            jsonKey: convertCaseFromSetting(col.sourceColumn, newCasing),
+        })),
+    });
     return {
+        ...mapping,
         documentModel: {
-            root: mapping.documentModel.root ? remapTable(mapping.documentModel.root) : undefined,
-            elements: mapping.documentModel.elements.map(remapTable),
+            root: mapping.documentModel.root ? remapXmlTable(mapping.documentModel.root) : undefined,
+            elements: mapping.documentModel.elements.map(remapXmlTable),
         },
+        jsonDocumentModel: mapping.jsonDocumentModel ? {
+            root: mapping.jsonDocumentModel.root ? remapJsonTable(mapping.jsonDocumentModel.root) : undefined,
+            elements: mapping.jsonDocumentModel.elements.map(remapJsonTable),
+        } : undefined,
     };
 }
 
@@ -175,9 +189,11 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
     const [showAddTablesModal, setShowAddTablesModal] = useState(false);
     const [showConfigDialog, setShowConfigDialog] = useState(false);
     const [showGenerateModal, setShowGenerateModal] = useState(false);
+    const [showGenerateJsonModal, setShowGenerateJsonModal] = useState(false);
     const [pendingCasingUpdate, setPendingCasingUpdate] = useState<{
         settings: ProjectSettings;
         lineType: ConnectionLineType;
+        mappingType?: import('@/services/ProjectService').MappingTargetType;
     } | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>('relational');
     const [showJoinDialog, setShowJoinDialog] = useState(false);
@@ -212,6 +228,9 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         const dm = activeProject?.mapping?.documentModel;
         if (dm?.root) keys.add(`${dm.root.sourceSchema}.${dm.root.sourceTable}`);
         dm?.elements.forEach(e => keys.add(`${e.sourceSchema}.${e.sourceTable}`));
+        const jdm = activeProject?.mapping?.jsonDocumentModel;
+        if (jdm?.root) keys.add(`${jdm.root.sourceSchema}.${jdm.root.sourceTable}`);
+        jdm?.elements.forEach(e => keys.add(`${e.sourceSchema}.${e.sourceTable}`));
         return keys;
     }, [activeProject?.mapping]);
 
@@ -447,12 +466,15 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         }
     }, [activeProject, onProjectSchemasUpdated]);
 
-    const persistSettings = useCallback(async (settings: ProjectSettings, lineType: ConnectionLineType, applyToMapping: boolean) => {
+    const persistSettings = useCallback(async (settings: ProjectSettings, lineType: ConnectionLineType, applyToMapping: boolean, mappingType?: import('@/services/ProjectService').MappingTargetType) => {
         if (!activeProject) return;
         setConnectionLineType(lineType);
-        const mapping = applyToMapping && activeProject.mapping && settings.defaultCasing
+        let mapping = applyToMapping && activeProject.mapping && settings.defaultCasing
             ? remapAllNames(activeProject.mapping, settings.defaultCasing)
             : activeProject.mapping;
+        if (mappingType !== undefined) {
+            mapping = { ...(mapping ?? { documentModel: { elements: [] } }), mappingType };
+        }
         const updatedProject: ProjectData = { ...activeProject, settings, mapping };
         try {
             await saveProject(updatedProject);
@@ -462,18 +484,20 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         }
     }, [activeProject, onProjectSettingsUpdated]);
 
-    const handleConfigSave = useCallback((settings: ProjectSettings, newLineType: ConnectionLineType) => {
+    const handleConfigSave = useCallback((settings: ProjectSettings, newLineType: ConnectionLineType, newMappingType?: import('@/services/ProjectService').MappingTargetType) => {
         if (!activeProject) return;
         setShowConfigDialog(false);
         const casingChanged = settings.defaultCasing !== activeProject.settings?.defaultCasing;
         const hasMapping = !!(
             activeProject.mapping?.documentModel.root ||
-            (activeProject.mapping?.documentModel.elements ?? []).length > 0
+            (activeProject.mapping?.documentModel.elements ?? []).length > 0 ||
+            activeProject.mapping?.jsonDocumentModel?.root ||
+            (activeProject.mapping?.jsonDocumentModel?.elements ?? []).length > 0
         );
         if (casingChanged && hasMapping) {
-            setPendingCasingUpdate({ settings, lineType: newLineType });
+            setPendingCasingUpdate({ settings, lineType: newLineType, mappingType: newMappingType });
         } else {
-            persistSettings(settings, newLineType, false);
+            persistSettings(settings, newLineType, false, newMappingType);
         }
     }, [activeProject, persistSettings]);
 
@@ -676,6 +700,8 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                             hasActiveProject={!!activeProject}
                             onOpenConfig={() => setShowConfigDialog(true)}
                             onGenerateXml={activeProject ? () => setShowGenerateModal(true) : undefined}
+                            onGenerateJson={activeProject ? () => setShowGenerateJsonModal(true) : undefined}
+                            mappingType={activeProject?.mapping?.mappingType ?? 'XML'}
                             onCreateJoin={activeProject ? () => setShowJoinDialog(true) : undefined}
                             onPrint={nodes.length > 0 ? handleExportPng : undefined}
                             viewMode={viewMode}
@@ -796,6 +822,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                 projectName={activeProject.name}
                 settings={activeProject.settings ?? {}}
                 connectionLineType={connectionLineType}
+                mappingType={activeProject.mapping?.mappingType ?? 'XML'}
                 onSave={handleConfigSave}
                 onClose={() => setShowConfigDialog(false)}
             />
@@ -806,6 +833,14 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                 projectId={activeProject.id}
                 projectName={activeProject.name}
                 onClose={() => setShowGenerateModal(false)}
+            />
+        )}
+
+        {showGenerateJsonModal && activeProject?.id && (
+            <GenerateJsonModal
+                projectId={activeProject.id}
+                projectName={activeProject.name}
+                onClose={() => setShowGenerateJsonModal(false)}
             />
         )}
 
@@ -843,7 +878,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                     <div className="flex justify-end gap-3">
                         <button
                             onClick={() => {
-                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, false);
+                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, false, pendingCasingUpdate.mappingType);
                                 setPendingCasingUpdate(null);
                             }}
                             className="px-4 py-2 text-sm text-gray-300 bg-slate-600 rounded hover:bg-slate-500 transition"
@@ -852,7 +887,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                         </button>
                         <button
                             onClick={() => {
-                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, true);
+                                persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, true, pendingCasingUpdate.mappingType);
                                 setPendingCasingUpdate(null);
                             }}
                             className="px-4 py-2 text-sm text-white bg-cyan-600 rounded hover:bg-cyan-500 transition"

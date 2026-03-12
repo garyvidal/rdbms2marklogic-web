@@ -128,11 +128,44 @@ export interface XmlTableMapping {
   columns: XmlColumnMapping[];
 }
 
+// ── JSON Mapping Types ────────────────────────────────────────────────────────
+
+export type JsonColumnType = 'string' | 'number' | 'boolean';
+export type JsonColumnMappingType = 'Property' | 'CUSTOM';
+export type JsonTableMappingType = 'RootObject' | 'Array' | 'InlineObject';
+
+export interface JsonColumnMapping {
+  id?: string;
+  sourceColumn: string;
+  jsonKey: string;
+  jsonType: JsonColumnType;
+  mappingType: JsonColumnMappingType;
+  customFunction?: string;
+}
+
+export interface JsonTableMapping {
+  id?: string;
+  sourceSchema: string;
+  sourceTable: string;
+  jsonName: string;
+  mappingType: JsonTableMappingType;
+  parentRef?: string;
+  columns: JsonColumnMapping[];
+}
+
+export type MappingTargetType = 'XML' | 'JSON' | 'BOTH';
+
 export interface ProjectMapping {
   documentModel: {
     root?: XmlTableMapping;
     elements: XmlTableMapping[];
   };
+  jsonDocumentModel?: {
+    root?: JsonTableMapping;
+    elements: JsonTableMapping[];
+  };
+  /** Which document type(s) to generate. Defaults to 'XML'. */
+  mappingType?: MappingTargetType;
 }
 
 export interface ProjectData {
@@ -205,6 +238,27 @@ export const generateXmlPreview = async (projectId: string, limit: number = 10):
   );
   if (!response.ok) {
     throw new Error(`Failed to generate preview: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export interface JsonPreviewResponse {
+  documents: string[];
+  totalRows: number;
+  errors: string[];
+}
+
+export const generateJsonPreview = async (projectId: string, limit: number = 10): Promise<JsonPreviewResponse> => {
+  const response = await fetch(
+    `${SCHEMA_SERVICE_URL}/v1/projects/${encodeURIComponent(projectId)}/generate/json/preview`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ limit }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Failed to generate JSON preview: ${response.statusText}`);
   }
   return response.json();
 };
