@@ -52,7 +52,7 @@ const EnvironmentSelect: React.FC<EnvironmentSelectProps> = ({ value, onChange, 
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-2 px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        className="w-full flex items-center gap-2 px-3 py-2 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
       >
         {ENV_DOT[value]}
         <span className="flex-1 text-left">{ENVIRONMENT_LABELS[value]}</span>
@@ -61,13 +61,13 @@ const EnvironmentSelect: React.FC<EnvironmentSelectProps> = ({ value, onChange, 
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute z-50 mt-1 w-full bg-slate-700 border border-slate-600 rounded shadow-lg py-1">
+        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 dark:bg-slate-700 dark:border-slate-600 rounded shadow-lg py-1">
           {ORDERED.map((env) => (
             <button
               key={env}
               type="button"
               onClick={() => { onChange(env); setOpen(false); }}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-white hover:bg-slate-600 transition-colors"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
             >
               {ENV_DOT[env]}
               <span className="flex-1 text-left font-medium">{ENVIRONMENT_LABELS[env]}</span>

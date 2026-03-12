@@ -177,7 +177,7 @@ export default function JsonPreview({ mapping, onClose }: JsonPreviewProps) {
             onClick={onClose}
         >
             <div
-                className="bg-slate-900 border border-slate-600 rounded-lg shadow-2xl flex flex-col w-full max-w-3xl"
+                className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl flex flex-col w-full max-w-3xl"
                 style={{ maxHeight: 'calc(100vh - 6rem)' }}
                 onClick={e => e.stopPropagation()}
             >

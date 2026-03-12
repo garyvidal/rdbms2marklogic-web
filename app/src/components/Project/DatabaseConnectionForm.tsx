@@ -80,14 +80,14 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-slate-700 rounded-lg max-w-2xl mx-auto">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-600">
+    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-gray-50 dark:bg-slate-700 rounded-lg max-w-2xl mx-auto border border-gray-200 dark:border-transparent">
+      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-200 dark:border-slate-600">
         <FaDatabase className="text-blue-400 text-lg" />
-        <h3 className="text-xl font-semibold text-white">Database Connection</h3>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white">Database Connection</h3>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
           Connection Name (optional)
         </label>
         <input
@@ -95,19 +95,19 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
           value={connectionName}
           onChange={(e) => setConnectionName(e.target.value)}
           placeholder="My Database Connection"
-          className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+          className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         />
         <p className="text-xs text-gray-400 mt-1">Give this connection a name to save it for later use</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
           Database Type *
         </label>
         <select
           value={connection.type}
           onChange={(e) => handleChange('type', e.target.value)}
-          className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+          className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         >
           <option value={ConnectionType.Postgres}>PostgreSQL</option>
           <option value={ConnectionType.MySql}>MySQL</option>
@@ -118,7 +118,7 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
             Host/URL *
           </label>
           <input
@@ -126,12 +126,12 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
             value={connection.url}
             onChange={(e) => handleChange('url', e.target.value)}
             placeholder="localhost"
-            className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+            className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
             Port *
           </label>
           <input
@@ -139,13 +139,13 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
             value={connection.port}
             onChange={(e) => handleChange('port', e.target.value)}
             placeholder="55432"
-            className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+            className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
           Database Name *
         </label>
         <input
@@ -153,12 +153,12 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
           value={connection.database}
           onChange={(e) => handleChange('database', e.target.value)}
           placeholder="database"
-          className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+          className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
           Username *
         </label>
         <input
@@ -166,12 +166,12 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
           value={connection.userName}
           onChange={(e) => handleChange('userName', e.target.value)}
           placeholder="username"
-          className="w-full px-4 py-2.5 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+          className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
           Password
         </label>
         <div className="relative">
@@ -180,7 +180,7 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
             value={connection.password}
             onChange={(e) => handleChange('password', e.target.value)}
             placeholder="password"
-            className="w-full px-4 py-2.5 pr-12 bg-slate-600 text-white border border-slate-500 rounded hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
+            className="w-full px-4 py-2.5 pr-12 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded hover:border-gray-400 dark:hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
           />
           <button
             type="button"
@@ -217,7 +217,7 @@ const DatabaseConnectionForm: React.FC<DatabaseConnectionFormProps> = ({ onConne
         </button>
       )}
 
-      <div className="border-t border-slate-600 pt-6">
+      <div className="border-t border-gray-200 dark:border-slate-600 pt-6">
         <SavedConnectionsList onConnectionSelect={(conn) => {
           setConnection(conn);
           onConnect(conn);

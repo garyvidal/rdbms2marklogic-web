@@ -49,4 +49,53 @@
     filter: blur(5px);
     background-color: #555555;
   }
+
+  /* ReactFlow Controls Styling */
+  .react-flow__controls {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .dark .react-flow__controls {
+    background-color: #1e293b;
+    border: 1px solid #475569;
+  }
+
+  .react-flow__controls button {
+    background-color: white;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dark .react-flow__controls button {
+    background-color: #1e293b;
+    border-bottom-color: #475569;
+    color: #d1d5db;
+  }
+
+  .react-flow__controls button:hover {
+    background-color: #f3f4f6;
+  }
+
+  .dark .react-flow__controls button:hover {
+    background-color: #334155;
+  }
+
+  .react-flow__controls button:last-child {
+    border-bottom: none;
+  }
+
+  .react-flow__controls button svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.5;
+  }
   

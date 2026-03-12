@@ -36,7 +36,7 @@ const TablesList: React.FC<TablesListProps> = ({ onTableSelect }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-700 text-white overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-gray-50 dark:bg-slate-700 text-gray-800 dark:text-white overflow-hidden">
       <div className="flex-1 overflow-y-auto">
         {loading && (
           <div className="flex items-center justify-center h-full">
@@ -58,21 +58,21 @@ const TablesList: React.FC<TablesListProps> = ({ onTableSelect }) => {
         )}
 
         {!loading && !error && tables.length > 0 && (
-          <ul className="divide-y divide-slate-600">
+          <ul className="divide-y divide-gray-200 dark:divide-slate-600">
             {tables.map((table) => (
               <li
                 key={table.name}
-                className={`px-3 py-2 cursor-pointer hover:bg-slate-600 transition ${
-                  selectedTable === table.name ? 'bg-slate-500' : ''
+                className={`px-3 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-600 transition ${
+                  selectedTable === table.name ? 'bg-blue-100 dark:bg-slate-500' : ''
                 }`}
                 onClick={() => handleTableSelect(table)}
               >
                 <div className="flex items-center gap-2">
                   <FaTable className="flex-shrink-0 text-blue-400" />
-                  <span className="text-sm font-medium truncate">{table.name}</span>
+                  <span className="text-sm font-semibold text-gray-950 dark:text-cyan-900 truncate">{table.name}</span>
                 </div>
                 {table.schema && (
-                  <div className="text-xs text-gray-400 ml-6 truncate">
+                  <div className="text-xs text-gray-900 dark:text-cyan-900 ml-6 truncate">
                     {table.schema}
                   </div>
                 )}
@@ -83,7 +83,7 @@ const TablesList: React.FC<TablesListProps> = ({ onTableSelect }) => {
       </div>
 
       {!loading && tables.length > 0 && (
-        <div className="border-t border-slate-600 p-3 bg-slate-800 text-xs text-gray-400">
+        <div className="border-t border-gray-200 dark:border-slate-600 p-3 bg-gray-100 dark:bg-slate-800 text-xs text-gray-950 dark:text-cyan-400">
           {tables.length} table{tables.length !== 1 ? 's' : ''} found
         </div>
       )}

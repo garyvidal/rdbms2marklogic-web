@@ -115,9 +115,9 @@ function formToConnection(f: ConnectionFormData): DbConnection {
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 const inputCls =
-  'w-full px-3 py-1.5 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  'w-full px-3 py-1.5 bg-white text-gray-800 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-600 dark:text-white dark:border-slate-500';
 
-const labelCls = 'block text-xs font-medium text-gray-300 mb-1';
+const labelCls = 'block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1';
 
 interface FieldProps {
   label: string;
@@ -218,15 +218,15 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Form header */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-700 shrink-0">
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onCancel}
-          className="text-gray-400 hover:text-white transition"
+          className="text-gray-400 hover:text-gray-700 dark:hover:text-white transition"
           title="Back to list"
         >
           <FaChevronLeft size={14} />
         </button>
-        <h3 className="text-white font-semibold">
+        <h3 className="text-gray-800 dark:text-white font-semibold">
           {initial ? 'Edit Connection' : 'New Connection'}
         </h3>
       </div>
@@ -377,7 +377,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
 
         {/* Postgres: SSL */}
         {isPostgres && (
-          <div className="border border-slate-600 rounded p-3 space-y-3">
+          <div className="border border-gray-200 dark:border-slate-600 rounded p-3 space-y-3">
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">SSL</div>
             <div className="flex items-center gap-3">
               <input
@@ -411,7 +411,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
         )}
 
         {/* Divider */}
-        <hr className="border-slate-600" />
+        <hr className="border-gray-200 dark:border-slate-600" />
 
         {/* Connection Name */}
         <Field label="Connection Name *">
@@ -439,7 +439,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
               type="button"
               onClick={handleTest}
               disabled={testStatus === 'testing'}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm rounded hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
             >
               {testStatus === 'testing' ? (
                 <>
@@ -475,10 +475,10 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
       </div>
 
       {/* Form footer */}
-      <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-slate-700 shrink-0">
+      <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm transition"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm transition dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
         >
           Cancel
         </button>
@@ -539,8 +539,8 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* List header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 shrink-0">
-        <h3 className="text-white font-semibold">Saved Connections</h3>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
+        <h3 className="text-gray-800 dark:text-white font-semibold">Saved Connections</h3>
         <button
           onClick={onNew}
           className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
@@ -571,11 +571,11 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                 : `${conn.connection.url}:${conn.connection.port} / ${conn.connection.database}`;
               return (
                 <li key={conn.id} className="flex items-stretch gap-2">
-                  <div className="flex-1 flex items-center gap-3 px-4 py-2.5 bg-slate-700 rounded min-w-0">
+                  <div className="flex-1 flex items-center gap-3 px-4 py-2.5 bg-gray-50 dark:bg-slate-700 rounded min-w-0">
                     <FaDatabase className="text-blue-400 shrink-0" size={15} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-white">{conn.name}</span>
+                        <span className="text-sm font-medium text-gray-800 dark:text-white">{conn.name}</span>
                         <EnvironmentBadge environment={conn.environment} />
                       </div>
                       <div className="text-xs text-gray-400 truncate mt-0.5">
@@ -586,7 +586,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
 
                   <button
                     onClick={() => onEdit(conn)}
-                    className="px-3 bg-slate-700 hover:bg-slate-600 text-gray-400 hover:text-white rounded transition"
+                    className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-gray-400 dark:hover:text-white rounded transition"
                     title={`Edit "${conn.name}"`}
                   >
                     <FaEdit size={13} />
@@ -603,7 +603,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                       </button>
                       <button
                         onClick={() => setConfirmDelete(null)}
-                        className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 text-white rounded transition"
+                        className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white rounded transition"
                       >
                         Cancel
                       </button>
@@ -611,7 +611,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                   ) : (
                     <button
                       onClick={() => setConfirmDelete(conn.id)}
-                      className="px-3 bg-slate-700 hover:bg-red-800 text-gray-400 hover:text-white rounded transition"
+                      className="px-3 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-700 dark:bg-slate-700 dark:hover:bg-red-800 dark:text-gray-400 dark:hover:text-white rounded transition"
                       title={`Delete "${conn.name}"`}
                     >
                       <FaTrash size={12} />
@@ -631,10 +631,10 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
       </div>
 
       {/* List footer */}
-      <div className="flex justify-end px-5 py-3 border-t border-slate-700 shrink-0">
+      <div className="flex justify-end px-5 py-3 border-t border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm transition"
+          className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm transition dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
         >
           Close
         </button>
@@ -692,12 +692,12 @@ const ConnectionsModal: React.FC<ConnectionsModalProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] min-h-0">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] min-h-0">
 
         {/* Modal header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 shrink-0">
-          <h2 className="text-lg font-bold text-white">Connections</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white">Connections</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:hover:text-white text-2xl leading-none">
             &times;
           </button>
         </div>

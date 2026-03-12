@@ -157,26 +157,26 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
 
     const targetOptions = nodeOptions.filter(n => n.id !== sourceId);
 
-    const selectClass = 'bg-slate-800 border border-slate-500 rounded px-2 py-1.5 text-xs text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed';
+    const selectClass = 'bg-white border border-gray-300 dark:bg-slate-800 dark:border-slate-500 rounded px-2 py-1.5 text-xs text-gray-800 dark:text-white font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed';
 
     return ReactDOM.createPortal(
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onCancel}>
             <div
-                className="bg-slate-700 rounded-lg shadow-2xl border border-slate-500 w-[680px] p-5"
+                className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-500 w-[680px] p-5"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-white">
                         <FaLink size={12} className="text-cyan-400" />
                         Create Synthetic Join
                     </div>
-                    <button onClick={onCancel} className="text-gray-400 hover:text-white transition">
+                    <button onClick={onCancel} className="text-gray-400 hover:text-gray-700 dark:hover:text-white transition">
                         <FaTimes size={14} />
                     </button>
                 </div>
 
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
                     Define join conditions between two tables with no foreign-key relationship.
                     Only columns with compatible SQL types can be selected as the target.
                 </p>
@@ -184,7 +184,7 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
                 {/* Table selection row */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
                     <div>
-                        <label className="block text-xs text-gray-400 mb-1">Source Table</label>
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Source Table</label>
                         <select
                             value={sourceId}
                             onChange={e => handleSourceChange(e.target.value)}
@@ -196,7 +196,7 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
                         </select>
                     </div>
                     <div>
-                        <label className="block text-xs text-gray-400 mb-1">Target Table</label>
+                        <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Target Table</label>
                         <select
                             value={targetId}
                             onChange={e => handleTargetChange(e.target.value)}
@@ -212,11 +212,11 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
 
                 {/* Column header */}
                 <div className="grid grid-cols-[1fr_80px_1fr_24px] gap-2 px-1 mb-1">
-                    <span className="text-xs text-gray-500 font-medium truncate">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
                         {sourceNode ? sourceNode.tableName : 'Source Column'}
                     </span>
                     <span className="text-xs text-gray-500 font-medium text-center">Condition</span>
-                    <span className="text-xs text-gray-500 font-medium truncate">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
                         {targetNode ? targetNode.tableName : 'Target Column'}
                     </span>
                     <span />
@@ -302,10 +302,10 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
                 </button>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-2 border-t border-slate-600 pt-4">
+                <div className="flex justify-end gap-2 border-t border-gray-200 dark:border-slate-600 pt-4">
                     <button
                         onClick={onCancel}
-                        className="px-4 py-1.5 text-sm text-gray-300 bg-slate-600 rounded hover:bg-slate-500 transition"
+                        className="px-4 py-1.5 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-600 rounded hover:bg-gray-200 dark:hover:bg-slate-500 transition"
                     >
                         Cancel
                     </button>
@@ -314,7 +314,7 @@ export default function SyntheticJoinDialog({ project, visibleNodeIds, onConfirm
                         disabled={!canSubmit}
                         className="px-4 py-1.5 text-sm font-semibold rounded transition
                             enabled:bg-cyan-700 enabled:hover:bg-cyan-600 enabled:text-white
-                            disabled:bg-slate-600 disabled:text-gray-500 disabled:cursor-not-allowed"
+                            disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-slate-600 dark:disabled:text-gray-500 disabled:cursor-not-allowed"
                     >
                         Create Join
                     </button>

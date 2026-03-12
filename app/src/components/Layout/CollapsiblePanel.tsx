@@ -15,18 +15,18 @@ const CollapsiblePanel = ({ title, body, direction, ribbonLabel, collapsed, onTo
         const label = ribbonLabel ?? title;
         return (
             <div
-                className="flex flex-col h-full bg-slate-800 border-r border-slate-600 w-8 items-center select-none cursor-pointer hover:bg-slate-700 transition-colors"
+                className="flex flex-col h-full bg-gray-100 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-600 w-8 items-center select-none cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
                 onClick={onToggle}
                 title={`Expand ${label}`}
             >
                 {direction === 'right' && (
-                    <div className="pt-2 pb-1 text-gray-400 hover:text-white shrink-0">
+                    <div className="pt-2 pb-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white shrink-0">
                         <FaChevronCircleLeft />
                     </div>
                 )}
                 <div className="flex-1 flex items-center justify-center overflow-hidden">
                     <span
-                        className="text-gray-400 text-xs font-medium tracking-wide whitespace-nowrap"
+                        className="text-gray-500 dark:text-gray-400 text-xs font-medium tracking-wide whitespace-nowrap"
                         style={{
                             writingMode: 'vertical-rl',
                             transform: direction === 'left' ? 'rotate(180deg)' : 'none',
@@ -36,7 +36,7 @@ const CollapsiblePanel = ({ title, body, direction, ribbonLabel, collapsed, onTo
                     </span>
                 </div>
                 {direction === 'left' && (
-                    <div className="pb-2 pt-1 text-gray-400 hover:text-white shrink-0">
+                    <div className="pb-2 pt-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white shrink-0">
                         <FaChevronCircleRight />
                     </div>
                 )}
@@ -45,14 +45,14 @@ const CollapsiblePanel = ({ title, body, direction, ribbonLabel, collapsed, onTo
     }
 
     return (
-        <div className="flex flex-col h-full bg-slate-700 text-white">
-            <h2 className="flex items-center shrink-0 border-b border-slate-600 bg-slate-800">
-                <span className="p-2 text-gray-400">
+        <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-700 text-gray-800 dark:text-white">
+            <h2 className="flex items-center shrink-0 border-b border-gray-200 dark:border-slate-600 bg-gray-100 dark:bg-slate-800">
+                <span className="p-2 text-gray-500 dark:text-gray-400">
                     <FaDatabase />
                 </span>
                 <span className="flex-1 p-2 text-left text-sm font-medium truncate">{title}</span>
                 <button
-                    className="p-2 text-gray-400 hover:text-white"
+                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"
                     onClick={onToggle}
                     title={`Collapse`}
                 >

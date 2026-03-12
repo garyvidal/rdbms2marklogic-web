@@ -44,11 +44,11 @@ function SchemaToolbar({
   const showXmlButton  = hasActiveProject && onGenerateXml  && (mappingType === 'XML'  || mappingType === 'BOTH');
   const showJsonButton = hasActiveProject && onGenerateJson && (mappingType === 'JSON' || mappingType === 'BOTH');
   return (
-    <div className="w-full h-10 align-top border-b overflow-y-hidden flex items-stretch justify-between">
+    <div className="w-full h-10 align-top border-b border-gray-200 bg-white dark:border-b-slate-700 dark:bg-slate-800 overflow-y-hidden flex items-stretch justify-between">
 
       {/* Left: toolbar tools */}
       <div className="flex items-center px-1 shrink-0 gap-0.5">
-        <button id="select-tool" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
+        <button id="select-tool" className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-gray-700 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-gray-300">
           <FaMousePointer />
         </button>
         <button
@@ -58,7 +58,7 @@ function SchemaToolbar({
           className={`p-1.5 rounded-none transition ${
             showEdges
               ? 'bg-cyan-700 text-white hover:bg-cyan-600'
-              : 'bg-slate-800 text-gray-300 hover:bg-slate-600'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-slate-800 dark:text-gray-300 dark:hover:bg-slate-600'
           }`}
         >
           <FaProjectDiagram />
@@ -70,20 +70,19 @@ function SchemaToolbar({
             onClick={onCreateJoin}
             disabled={!hasNodes}
             title="Create synthetic join between two tables"
-            className={`flex items-center gap-1 px-2 py-1 text-xs rounded-none transition ${
+            className={`p-1.5 rounded-none transition ${
               hasNodes
-                ? 'bg-slate-800 text-cyan-300 hover:bg-slate-600 hover:text-cyan-200'
-                : 'bg-slate-800 text-gray-600 cursor-not-allowed'
+                ? 'bg-gray-200 text-cyan-700 hover:bg-gray-300 hover:text-cyan-600 dark:bg-slate-800 dark:text-cyan-300 dark:hover:bg-slate-600 dark:hover:text-cyan-200'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-slate-800 dark:text-gray-600'
             }`}
           >
             <FaLink size={11} />
-            <span className="hidden sm:inline">Join</span>
           </button>
         )}
-        <button id="redo" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
+        <button id="redo" className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-gray-700 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-gray-300">
           <FaRedo />
         </button>
-        <button id="undo" className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300">
+        <button id="undo" className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-gray-700 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-gray-300">
           <FaUndo />
         </button>
       </div>
@@ -94,40 +93,36 @@ function SchemaToolbar({
           <button
             onClick={onPrint}
             title="Download diagram as PNG"
-            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300 flex items-center gap-1.5 text-xs"
+            className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-gray-700 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-gray-300"
           >
             <FaFileImage />
-            <span className="hidden sm:inline">Download PNG</span>
           </button>
         )}
         {showXmlButton && (
           <button
             onClick={onGenerateXml}
             title="Generate XML documents from mapping"
-            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 text-xs"
+            className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-emerald-700 hover:text-emerald-800 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-emerald-400 dark:hover:text-emerald-300"
           >
             <FaCode />
-            <span className="hidden sm:inline">Generate XML</span>
           </button>
         )}
         {showJsonButton && (
           <button
             onClick={onGenerateJson}
             title="Generate JSON documents from mapping"
-            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-amber-400 hover:text-amber-300 flex items-center gap-1.5 text-xs"
+            className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-amber-700 hover:text-amber-800 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-amber-400 dark:hover:text-amber-300"
           >
             <SiJson />
-            <span className="hidden sm:inline">Generate JSON</span>
           </button>
         )}
         {hasActiveProject && onOpenConfig && (
           <button
             onClick={onOpenConfig}
             title="Project settings"
-            className="p-1.5 bg-slate-800 rounded-none hover:bg-slate-600 text-gray-300 flex items-center gap-1.5 text-xs"
+            className="p-1.5 bg-gray-200 rounded-none hover:bg-gray-300 text-gray-700 dark:bg-slate-800 dark:hover:bg-slate-600 dark:text-gray-300"
           >
             <FaCog />
-            <span className="hidden sm:inline">Settings</span>
           </button>
         )}
       </div>

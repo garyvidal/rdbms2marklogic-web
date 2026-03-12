@@ -79,8 +79,8 @@ function formToConnection(f: FormData): MarkLogicConnection {
 // ── Shared style constants ────────────────────────────────────────────────────
 
 const inputCls =
-  'w-full px-3 py-1.5 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
-const labelCls = 'block text-xs font-medium text-gray-300 mb-1';
+  'w-full px-3 py-1.5 bg-white text-gray-800 border border-gray-300 dark:bg-slate-600 dark:text-white dark:border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+const labelCls = 'block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1';
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div>
@@ -150,15 +150,15 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-700 shrink-0">
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onCancel}
-          className="text-gray-400 hover:text-white transition"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition"
           title="Back to list"
         >
           <FaChevronLeft size={14} />
         </button>
-        <h3 className="text-white font-semibold">
+        <h3 className="text-gray-800 dark:text-white font-semibold">
           {initial ? 'Edit MarkLogic Connection' : 'New MarkLogic Connection'}
         </h3>
       </div>
@@ -233,8 +233,8 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
         </Field>
 
         {/* SSL */}
-        <div className="border border-slate-600 rounded p-3 space-y-1">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">SSL / TLS</div>
+        <div className="border border-gray-200 dark:border-slate-600 rounded p-3 space-y-1">
+          <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">SSL / TLS</div>
           <div className="flex items-center gap-3 pt-1">
             <input
               id="ml-useSSL"
@@ -243,13 +243,13 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
               onChange={(e) => set('useSSL', e.target.checked)}
               className="accent-blue-500 w-4 h-4"
             />
-            <label htmlFor="ml-useSSL" className="text-sm text-gray-300 cursor-pointer">
+            <label htmlFor="ml-useSSL" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
               Use SSL / TLS
             </label>
           </div>
         </div>
 
-        <hr className="border-slate-600" />
+        <hr className="border-gray-200 dark:border-slate-600" />
 
         {/* Connection Name */}
         <Field label="Connection Name *">
@@ -269,7 +269,7 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
               type="button"
               onClick={handleTest}
               disabled={testStatus === 'testing'}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm rounded hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-white text-sm rounded hover:bg-gray-200 dark:hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {testStatus === 'testing' ? (
                 <><FaSpinner className="animate-spin" size={12} /> Testing...</>
@@ -303,10 +303,10 @@ const ConnectionForm: React.FC<ConnectionFormProps> = ({ initial, onSaved, onCan
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-slate-700 shrink-0">
+      <div className="flex items-center justify-end gap-3 px-5 py-3 border-t border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm transition"
+          className="px-4 py-2 bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-white rounded hover:bg-gray-200 dark:hover:bg-slate-500 text-sm transition"
         >
           Cancel
         </button>
@@ -360,8 +360,8 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* List header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 shrink-0">
-        <h3 className="text-white font-semibold">MarkLogic Connections</h3>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
+        <h3 className="text-gray-800 dark:text-white font-semibold">MarkLogic Connections</h3>
         <button
           onClick={onNew}
           className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"
@@ -390,11 +390,11 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
               const summary = `${conn.connection.host}:${conn.connection.port}${conn.connection.database ? ` / ${conn.connection.database}` : ''}`;
               return (
                 <li key={conn.id} className="flex items-stretch gap-2">
-                  <div className="flex-1 flex items-center gap-3 px-4 py-2.5 bg-slate-700 rounded min-w-0">
+                  <div className="flex-1 flex items-center gap-3 px-4 py-2.5 bg-gray-100 dark:bg-slate-700 rounded min-w-0">
                     <FaDatabase className="text-amber-400 shrink-0" size={15} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-white">{conn.name}</span>
+                        <span className="text-sm font-medium text-gray-800 dark:text-white">{conn.name}</span>
                         {conn.connection.useSSL && (
                           <span className="flex items-center gap-1 text-xs text-green-400">
                             <FaLock size={9} /> SSL
@@ -409,7 +409,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
 
                   <button
                     onClick={() => onEdit(conn)}
-                    className="px-3 bg-slate-700 hover:bg-slate-600 text-gray-400 hover:text-white rounded transition"
+                    className="px-3 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white rounded transition"
                     title={`Edit "${conn.name}"`}
                   >
                     <FaEdit size={13} />
@@ -426,7 +426,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                       </button>
                       <button
                         onClick={() => setConfirmDelete(null)}
-                        className="px-2 py-1 text-xs bg-slate-600 hover:bg-slate-500 text-white rounded transition"
+                        className="px-2 py-1 text-xs bg-gray-100 dark:bg-slate-600 hover:bg-gray-200 dark:hover:bg-slate-500 text-gray-700 dark:text-white rounded transition"
                       >
                         Cancel
                       </button>
@@ -434,7 +434,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
                   ) : (
                     <button
                       onClick={() => setConfirmDelete(conn.id)}
-                      className="px-3 bg-slate-700 hover:bg-red-800 text-gray-400 hover:text-white rounded transition"
+                      className="px-3 bg-gray-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-800 text-gray-500 dark:text-gray-400 hover:text-red-700 dark:hover:text-white rounded transition"
                       title={`Delete "${conn.name}"`}
                     >
                       <FaTrash size={12} />
@@ -454,10 +454,10 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="flex justify-end px-5 py-3 border-t border-slate-700 shrink-0">
+      <div className="flex justify-end px-5 py-3 border-t border-gray-200 dark:border-slate-700 shrink-0">
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm transition"
+          className="px-4 py-2 bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-white rounded hover:bg-gray-200 dark:hover:bg-slate-500 text-sm transition"
         >
           Close
         </button>
@@ -501,15 +501,15 @@ const MarkLogicConnectionsModal: React.FC<MarkLogicConnectionsModalProps> = ({ o
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] min-h-0">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[85vh] min-h-0">
 
         {/* Modal header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-slate-700 shrink-0">
           <div className="flex items-center gap-2">
             <FaDatabase className="text-amber-400" size={16} />
-            <h2 className="text-lg font-bold text-white">MarkLogic Connections</h2>
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white">MarkLogic Connections</h2>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:hover:text-white text-2xl leading-none">
             &times;
           </button>
         </div>

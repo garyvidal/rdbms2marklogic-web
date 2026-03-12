@@ -54,7 +54,7 @@ export default function GenerateJsonModal({ projectId, projectName, onClose }: G
             onClick={onClose}
         >
             <div
-                className="bg-slate-900 border border-slate-600 rounded-lg shadow-2xl flex flex-col w-full max-w-5xl"
+                className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl flex flex-col w-full max-w-5xl"
                 style={{ maxHeight: 'calc(100vh - 4rem)' }}
                 onClick={e => e.stopPropagation()}
             >

@@ -5,6 +5,7 @@ import * as dagreNS from "@dagrejs/dagre";
 import Splitter from "../Layout/Splitter";
 import { useResizable } from "react-resizable-layout";
 import { cn } from "@/lib/Utils";
+import { useTheme } from "@/contexts/ThemeContext";
 import CollapsiblePanel from "../Layout/CollapsiblePanel";
 import SchemaToolbar, { ViewMode } from "./SchemaToolbar";
 import DiagramTabs from "./DiagramTabs";
@@ -175,6 +176,7 @@ interface SchemaViewProps {
 }
 
 const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjectClose, onProjectRename, onDiagramChange, onProjectSchemasUpdated, onProjectSettingsUpdated }: SchemaViewProps): JSX.Element => {
+    const { theme } = useTheme();
     const [selectedTable, setSelectedTable] = useState<DbTable | null>(null);
     const [selectedSchema, setSelectedSchema] = useState<DbSchema | null>(null);
     const [database, setDatabase] = useState<DbDatabase | null>(null);
@@ -647,7 +649,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         <div className="relative flex-1 overflow-hidden flex">
             {showModal && (
                 <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 rounded">
-                    <div className="bg-slate-700 rounded-lg shadow-2xl p-8 relative max-w-2xl w-full mx-4">
+                    <div className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl p-8 relative max-w-2xl w-full mx-4">
                         <button
                             onClick={() => setShowConnectionModal(false)}
                             className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl leading-none w-8 h-8 flex items-center justify-center"
@@ -729,7 +731,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                     onNodesChange={onNodesChange}
                                     onEdgesChange={onEdgesChange}
                                     nodeTypes={nodeTypes}
-                                    colorMode="dark"
+                                    colorMode={theme === 'dark' ? 'dark' : 'light'}
                                     fitView
                                     onNodeClick={handleNodeClick}
                                     onNodeContextMenu={handleNodeContextMenu}
@@ -776,8 +778,8 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                     onHighlightedTableConsumed={() => setHighlightedMappingTable(null)}
                                 />
                             ) : selectedTable ? (
-                                <div className="h-full w-full bg-slate-700 text-white overflow-auto">
-                                    <div className="p-4 border-b border-slate-600">
+                                <div className="h-full w-full bg-[#1b2a3b] dark:bg-slate-700 text-white overflow-auto">
+                                    <div className="p-4 border-b border-[#0d1520] dark:border-slate-600">
                                         <h3 className="font-semibold text-lg">{selectedTable.tableName}</h3>
                                         <p className="text-sm text-gray-400">{selectedSchema?.name}</p>
                                     </div>
@@ -788,7 +790,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                             </h4>
                                             <div className="space-y-2">
                                                 {Object.values(selectedTable.columns).map((col) => (
-                                                    <div key={col.name} className="text-xs bg-slate-600 p-2 rounded">
+                                                    <div key={col.name} className="text-xs bg-white/10 p-2 rounded">
                                                         <div className="font-mono font-semibold text-blue-300">{col.name}</div>
                                                         <div className="text-gray-300">{col.type}</div>
                                                         {col.columnType?.columnType && (
@@ -806,7 +808,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                     )}
                                 </div>
                             ) : (
-                                <div className="h-full w-full bg-slate-700 text-gray-400 flex items-center justify-center flex-col gap-3">
+                                <div className="h-full w-full bg-[#1b2a3b] dark:bg-slate-700 text-gray-400 flex items-center justify-center flex-col gap-3">
                                     <p className="text-sm">Select a table to view details</p>
                                 </div>
                             )}
@@ -866,13 +868,13 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
 
         {pendingCasingUpdate && ReactDOM.createPortal(
             <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-                <div className="bg-slate-700 rounded-lg shadow-2xl border border-slate-500 w-96 p-6">
-                    <h3 className="text-white font-semibold text-base mb-2">Update Mapping Names?</h3>
-                    <p className="text-gray-300 text-sm mb-1">
+                <div className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-500 w-96 p-6">
+                    <h3 className="text-gray-800 dark:text-white font-semibold text-base mb-2">Update Mapping Names?</h3>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-1">
                         The default field casing has changed to{' '}
                         <span className="font-mono text-cyan-300">{pendingCasingUpdate.settings.defaultCasing?.toLowerCase()}</span>.
                     </p>
-                    <p className="text-gray-400 text-sm mb-5">
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-5">
                         Would you like to regenerate all XML names in your document model mapping using the new casing?
                     </p>
                     <div className="flex justify-end gap-3">
@@ -881,7 +883,7 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
                                 persistSettings(pendingCasingUpdate.settings, pendingCasingUpdate.lineType, false, pendingCasingUpdate.mappingType);
                                 setPendingCasingUpdate(null);
                             }}
-                            className="px-4 py-2 text-sm text-gray-300 bg-slate-600 rounded hover:bg-slate-500 transition"
+                            className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-600 rounded hover:bg-gray-200 dark:hover:bg-slate-500 transition"
                         >
                             Keep Existing Names
                         </button>
@@ -903,15 +905,15 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         {edgeContextMenu && ReactDOM.createPortal(
             <div
                 style={{ position: "fixed", top: edgeContextMenu.y, left: edgeContextMenu.x, zIndex: 9999 }}
-                className="bg-slate-800 border border-yellow-700 rounded shadow-lg py-1 min-w-[180px]"
+                className="bg-white dark:bg-slate-800 border border-yellow-500 dark:border-yellow-700 rounded shadow-lg py-1 min-w-[180px]"
                 onMouseLeave={() => setEdgeContextMenu(null)}
             >
-                <div className="px-3 py-1 text-xs text-yellow-500 border-b border-slate-600 mb-1 flex items-center gap-1.5">
+                <div className="px-3 py-1 text-xs text-yellow-600 dark:text-yellow-500 border-b border-gray-200 dark:border-slate-600 mb-1 flex items-center gap-1.5">
                     <span>⚡</span>
                     <span className="truncate max-w-[160px]">Synthetic Join</span>
                 </div>
                 <button
-                    className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-slate-600 hover:text-red-300 transition"
+                    className="w-full text-left px-3 py-1.5 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-600 hover:text-red-700 dark:hover:text-red-300 transition"
                     onClick={() => handleDeleteJoin(edgeContextMenu.edgeId)}
                 >
                     Delete join
@@ -923,14 +925,14 @@ const SchemaView = ({ openProjects, activeProjectName, onProjectSelect, onProjec
         {contextMenu && ReactDOM.createPortal(
             <div
                 style={{ position: "fixed", top: contextMenu.y, left: contextMenu.x, zIndex: 9999 }}
-                className="bg-slate-800 border border-slate-600 rounded shadow-lg py-1 min-w-[160px]"
+                className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-lg py-1 min-w-[160px]"
                 onMouseLeave={() => setContextMenu(null)}
             >
-                <div className="px-3 py-1 text-xs text-gray-400 border-b border-slate-600 mb-1 truncate max-w-[200px]">
+                <div className="px-3 py-1 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-600 mb-1 truncate max-w-[200px]">
                     {contextMenu.nodeId.substring(contextMenu.nodeId.indexOf(".") + 1)}
                 </div>
                 <button
-                    className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-slate-600 hover:text-red-300 transition"
+                    className="w-full text-left px-3 py-1.5 text-sm text-red-500 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-600 hover:text-red-700 dark:hover:text-red-300 transition"
                     onClick={() => handleRemoveNode(contextMenu.nodeId)}
                 >
                     Remove from view

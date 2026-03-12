@@ -15,15 +15,15 @@ const BADGE_LABEL: Record<string, string> = {
 };
 
 const HEADER_BG: Record<string, string> = {
-    RootObject:  'bg-cyan-900/40',
-    Array:       'bg-slate-600',
-    InlineObject: 'bg-violet-900/40',
+    RootObject:  'bg-cyan-50 dark:bg-cyan-900/40',
+    Array:       'bg-gray-100 dark:bg-slate-600',
+    InlineObject: 'bg-violet-50 dark:bg-violet-900/40',
 };
 
 const ACCENT: Record<string, string> = {
-    RootObject:  'text-cyan-300',
-    Array:       'text-gray-200',
-    InlineObject: 'text-violet-300',
+    RootObject:  'text-cyan-700 dark:text-cyan-300',
+    Array:       'text-gray-700 dark:text-gray-200',
+    InlineObject: 'text-violet-700 dark:text-violet-300',
 };
 
 const DND_KEY = 'application/x-json-row-index';
@@ -103,10 +103,10 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
         ) : null;
 
     return (
-        <div className="bg-slate-700 rounded border border-slate-600 overflow-hidden">
+        <div className="bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600 overflow-hidden">
             {/* Header */}
             <div className={`flex items-center gap-2 px-3 py-2 ${headerBg}`}>
-                <span className={`text-xs font-bold px-1.5 py-0.5 rounded bg-slate-800 shrink-0 ${accent}`}>
+                <span className={`text-xs font-bold px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-gray-200 dark:border-transparent shrink-0 ${accent}`}>
                     {badge}
                 </span>
 
@@ -131,8 +131,8 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
                     onClick={() => setSettingsOpen(v => !v)}
                     className={`shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition border ${
                         settingsOpen
-                            ? 'border-slate-400 bg-slate-600 text-white'
-                            : 'border-slate-600 bg-transparent text-gray-400 hover:text-gray-200 hover:border-slate-500'
+                            ? 'border-gray-400 bg-gray-200 text-gray-800 dark:border-slate-400 dark:bg-slate-600 dark:text-white'
+                            : 'border-gray-300 bg-transparent text-gray-500 hover:text-gray-700 hover:border-gray-400 dark:border-slate-600 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
                     }`}
                 >
                     {settingsOpen ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
@@ -145,21 +145,21 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
 
             {/* Settings panel */}
             {settingsOpen && (
-                <div className="px-4 py-3 border-b border-slate-600 bg-slate-800/70 space-y-3">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/70 space-y-3">
                     <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-500 w-24 shrink-0">JSON Key</label>
                         <span className="text-xs text-gray-500">"</span>
                         <input
                             value={mapping.jsonName}
                             onChange={e => onChange({ ...mapping, jsonName: e.target.value })}
-                            className="flex-1 min-w-0 bg-slate-700 border border-slate-500 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                            className="flex-1 min-w-0 bg-white border border-gray-300 rounded px-2 py-1 text-xs font-mono text-gray-800 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:bg-slate-700 dark:border-slate-500 dark:text-white"
                         />
                         <span className="text-xs text-gray-500">"</span>
                     </div>
                     {isInline && (
                         <div className="flex items-center gap-2">
                             <label className="text-xs text-gray-500 w-24 shrink-0">Nested Under</label>
-                            <span className="text-xs font-mono text-violet-300 bg-violet-900/20 border border-violet-800 px-2 py-1 rounded">
+                            <span className="text-xs font-mono text-violet-700 bg-violet-50 border border-violet-200 dark:text-violet-300 dark:bg-violet-900/20 dark:border-violet-800 px-2 py-1 rounded">
                                 {parentJsonName || '(none)'}
                             </span>
                         </div>
@@ -184,8 +184,8 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
                                 onDragOver={e => handleDragOver(e, i)}
                                 onDrop={e => handleDrop(e, i)}
                                 onDragEnd={resetDrag}
-                                className={`flex items-center gap-2 px-2 py-1.5 text-xs border-t border-slate-600/40 transition-colors group select-none ${
-                                    isDragging ? 'opacity-30 bg-slate-500/30' : 'hover:bg-slate-600/50'
+                                className={`flex items-center gap-2 px-2 py-1.5 text-xs border-t border-gray-100 dark:border-slate-600/40 transition-colors group select-none ${
+                                    isDragging ? 'opacity-30 bg-gray-200/50 dark:bg-slate-500/30' : 'hover:bg-gray-50 dark:hover:bg-slate-600/50'
                                 }`}
                             >
                                 <span
@@ -215,7 +215,7 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
                                     value={col.jsonKey}
                                     onChange={e => updateJsonKey(i, e.target.value)}
                                     onMouseDown={e => e.stopPropagation()}
-                                    className="flex-1 min-w-0 bg-transparent font-mono text-white focus:outline-none rounded px-1 focus:ring-1 focus:ring-cyan-500"
+                                    className="flex-1 min-w-0 bg-transparent font-mono text-gray-800 dark:text-white focus:outline-none rounded px-1 focus:ring-1 focus:ring-cyan-500"
                                 />
 
                                 {/* DB column info toggle */}
@@ -225,8 +225,8 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
                                     title={expandedSourceIndex === i ? 'Hide source info' : 'Show source column info'}
                                     className={`shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border transition ${
                                         expandedSourceIndex === i
-                                            ? 'border-slate-400 bg-slate-600 text-gray-300'
-                                            : 'border-slate-600 text-gray-400 hover:text-gray-200 hover:border-slate-500'
+                                            ? 'border-gray-400 bg-gray-200 text-gray-700 dark:border-slate-400 dark:bg-slate-600 dark:text-gray-300'
+                                            : 'border-gray-300 text-gray-400 hover:text-gray-600 hover:border-gray-400 dark:border-slate-600 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
                                     }`}
                                 >
                                     <FaDatabase size={8} />
@@ -242,10 +242,10 @@ export default function JsonMappingTableCard({ mapping, onChange, onRemove, pare
                             </div>
 
                             {expandedSourceIndex === i && (
-                                <div className="px-3 py-2 bg-slate-800/60 border-t border-slate-600/50 flex items-center gap-4">
+                                <div className="px-3 py-2 bg-gray-50 dark:bg-slate-800/60 border-t border-gray-100 dark:border-slate-600/50 flex items-center gap-4">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-xs text-gray-500">Column</span>
-                                        <span className="text-xs font-mono text-gray-300 bg-slate-700 px-1.5 py-0.5 rounded">{col.sourceColumn}</span>
+                                        <span className="text-xs font-mono text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 px-1.5 py-0.5 rounded">{col.sourceColumn}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-xs text-gray-500">JSON Type</span>

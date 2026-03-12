@@ -7,6 +7,7 @@ import '@/styles/Splitter.css';
 
 import SchemaView from "./components/SchemaView/SchemaView";
 import Header from "./components/Layout/Header";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import CreateProjectWizard from "./components/Project/CreateProjectWizard";
 import OpenProjectModal from "./components/Project/OpenProjectModal";
 import ConnectionsModal from "./components/Project/ConnectionsModal";
@@ -98,7 +99,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="App flex flex-column h-screen bg-slate-800 font-mono color-white overflow-hidden">
+    <ThemeProvider>
+    <div className="App flex flex-column h-screen bg-[#f5f6f8] dark:bg-slate-800 font-mono color-white overflow-hidden">
       <Header
         onNewProject={() => setShowWizard(true)}
         onOpenProject={() => setShowOpenModal(true)}
@@ -136,5 +138,6 @@ export default function App() {
         <MarkLogicConnectionsModal onClose={() => setShowMarkLogicModal(false)} />
       )}
     </div>
+    </ThemeProvider>
   );
 }

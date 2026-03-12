@@ -44,10 +44,10 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
 
     const dialog = (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-600">
+            <div className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-600">
                     <div>
-                        <h2 className="text-white font-semibold text-lg">Project Settings</h2>
+                        <h2 className="text-gray-800 dark:text-white font-semibold text-lg">Project Settings</h2>
                         <p className="text-gray-400 text-xs mt-0.5">{projectName}</p>
                     </div>
                     <button
@@ -61,10 +61,10 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
                 <div className="px-6 py-5 space-y-5">
                     {/* Mapping Type */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Document Mapping Type
                         </label>
-                        <p className="text-xs text-gray-400 mb-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                             Choose which document format(s) to generate from this project's relational data.
                         </p>
                         <div className="flex gap-2">
@@ -75,8 +75,8 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
                                     title={mt.description}
                                     className={`flex-1 px-3 py-2 rounded border text-sm font-medium transition ${
                                         selectedMappingType === mt.value
-                                            ? 'border-cyan-500 bg-cyan-900/30 text-cyan-200'
-                                            : 'border-slate-600 bg-slate-800 text-gray-400 hover:border-slate-500 hover:text-gray-200'
+                                            ? 'border-cyan-500 bg-cyan-900/30 text-cyan-700 dark:text-cyan-200'
+                                            : 'border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-slate-500 hover:text-gray-700 dark:hover:text-gray-200'
                                     }`}
                                 >
                                     {mt.label}
@@ -87,10 +87,10 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
 
                     {/* Default Casing */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Default Field Casing
                         </label>
-                        <p className="text-xs text-gray-400 mb-3">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                             Applied when generating MarkLogic document field names from database columns.
                         </p>
                         <div className="space-y-2">
@@ -99,8 +99,8 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
                                     key={nc.value}
                                     className={`flex items-center justify-between px-3 py-2 rounded cursor-pointer border transition ${
                                         defaultCasing === nc.value
-                                            ? 'border-cyan-500 bg-cyan-900/30 text-white'
-                                            : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-500'
+                                            ? 'border-cyan-500 bg-cyan-900/30 text-cyan-700 dark:text-white'
+                                            : 'border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-slate-500'
                                     }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -122,13 +122,13 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
 
                     {/* Connection Line Type */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-200 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Connection Line Style
                         </label>
                         <select
                             value={lineType}
                             onChange={e => setLineType(e.target.value as ConnectionLineType)}
-                            className="w-full bg-slate-800 border border-slate-600 text-gray-200 text-sm rounded px-3 py-2 focus:outline-none focus:border-cyan-500"
+                            className="w-full bg-white border border-gray-300 text-gray-800 dark:bg-slate-800 dark:border-slate-600 dark:text-gray-200 text-sm rounded px-3 py-2 focus:outline-none focus:border-cyan-500"
                         >
                             {LINE_TYPES.map(lt => (
                                 <option key={lt.value} value={lt.value}>{lt.label}</option>
@@ -137,10 +137,10 @@ export function ConfigDialog({ projectName, settings, connectionLineType, mappin
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-600">
+                <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-slate-600">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm text-gray-300 bg-slate-600 rounded hover:bg-slate-500 transition"
+                        className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-slate-600 rounded hover:bg-gray-200 dark:hover:bg-slate-500 transition"
                     >
                         Cancel
                     </button>

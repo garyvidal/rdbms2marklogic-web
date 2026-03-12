@@ -47,12 +47,12 @@ export function ConnectionLineTypeControl({ value, onChange }: ConnectionLineTyp
         <div
             data-conntype-controls
             style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
-            className="bg-slate-800 border border-slate-600 rounded shadow-lg min-w-[150px]"
+            className="bg-white border border-gray-200 rounded shadow-lg min-w-[150px] dark:bg-slate-800 dark:border-slate-600"
         >
             {LINE_TYPES.map(type => (
                 <button
                     key={type.value}
-                    className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-600 ${value === type.value ? "text-cyan-400 font-semibold" : "text-gray-200"}`}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-slate-600 ${value === type.value ? "text-cyan-600 dark:text-cyan-400 font-semibold" : "text-gray-700 dark:text-gray-200"}`}
                     onClick={() => {
                         setOpen(false);
                         onChange(type.value);
@@ -71,7 +71,7 @@ export function ConnectionLineTypeControl({ value, onChange }: ConnectionLineTyp
                 ref={buttonRef}
                 title="Edge line style"
                 onClick={handleToggle}
-                className={`p-1.5 rounded-none transition text-gray-300 flex items-center gap-1 text-xs ${open ? "bg-slate-600" : "bg-slate-800 hover:bg-slate-600"}`}
+                className={`p-1.5 rounded-none transition flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300 ${open ? "bg-gray-300 dark:bg-slate-600" : "bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-600"}`}
             >
                 <FaProjectDiagram className="shrink-0" />
                 <span className="hidden sm:inline">{current}</span>

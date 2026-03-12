@@ -68,10 +68,10 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-600">
-          <h2 className="text-white font-semibold text-lg">Open Project</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+      <div className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl w-full max-w-md mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-600">
+          <h2 className="text-gray-800 dark:text-white font-semibold text-lg">Open Project</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:hover:text-white">
             <FaTimes />
           </button>
         </div>
@@ -114,7 +114,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
                             if (e.key === 'Enter') handleRename(project);
                             if (e.key === 'Escape') setRenamingName(null);
                           }}
-                          className="flex-1 px-3 py-2 bg-slate-800 text-white text-sm rounded border border-slate-500 focus:outline-none focus:border-blue-400"
+                          className="flex-1 px-3 py-2 bg-white text-gray-800 text-sm rounded border border-gray-300 focus:outline-none focus:border-blue-400 dark:bg-slate-800 dark:text-white dark:border-slate-500"
                         />
                         <button
                           onClick={() => handleRename(project)}
@@ -125,7 +125,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
                         </button>
                         <button
                           onClick={() => setRenamingName(null)}
-                          className="px-2 py-1 text-xs bg-slate-500 hover:bg-slate-400 text-white rounded transition shrink-0"
+                          className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-slate-500 dark:hover:bg-slate-400 dark:text-white rounded transition shrink-0"
                         >
                           Cancel
                         </button>
@@ -137,13 +137,13 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
                           disabled={isOpen}
                           className={`flex-1 text-left px-4 py-3 rounded flex items-start gap-3 transition ${
                             isOpen
-                              ? 'bg-slate-600 opacity-50 cursor-default'
-                              : 'bg-slate-600 hover:bg-slate-500 cursor-pointer'
+                              ? 'bg-gray-100 dark:bg-slate-600 opacity-50 cursor-default'
+                              : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-600 dark:hover:bg-slate-500 cursor-pointer'
                           }`}
                         >
                           <FaFolderOpen className="text-yellow-400 mt-0.5 shrink-0" size={16} />
                           <div className="min-w-0">
-                            <div className="text-white text-sm font-medium truncate">{project.name}</div>
+                            <div className="text-gray-800 dark:text-white text-sm font-medium truncate">{project.name}</div>
                             <div className="text-gray-400 text-xs mt-0.5">
                               {Object.keys(project.schemas).length} schema{Object.keys(project.schemas).length !== 1 ? 's' : ''} &bull; {tableCount} table{tableCount !== 1 ? 's' : ''}
                               {project.connectionName && <> &bull; {project.connectionName}</>}
@@ -154,7 +154,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
 
                         <button
                           onClick={() => { setRenamingName(project.name); setRenameValue(project.name); setConfirmDelete(null); }}
-                          className="shrink-0 px-3 rounded bg-slate-600 hover:bg-slate-500 text-gray-400 hover:text-white transition"
+                          className="shrink-0 px-3 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-gray-400 dark:hover:text-white transition"
                           title={`Rename ${project.name}`}
                         >
                           <FaPencilAlt size={12} />
@@ -171,7 +171,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
-                              className="px-2 py-1 text-xs bg-slate-500 hover:bg-slate-400 text-white rounded transition"
+                              className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-slate-500 dark:hover:bg-slate-400 dark:text-white rounded transition"
                             >
                               Cancel
                             </button>
@@ -179,7 +179,7 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
                         ) : (
                           <button
                             onClick={() => setConfirmDelete(project.name)}
-                            className="shrink-0 px-3 rounded bg-slate-600 hover:bg-red-800 text-gray-400 hover:text-white transition"
+                            className="shrink-0 px-3 rounded bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-700 dark:bg-slate-600 dark:hover:bg-red-800 dark:text-gray-400 dark:hover:text-white transition"
                             title={`Delete ${project.name}`}
                           >
                             <FaTrash size={12} />
@@ -194,10 +194,10 @@ export default function OpenProjectModal({ onOpen, onClose, onDeleted, onRenamed
           )}
         </div>
 
-        <div className="px-6 py-3 border-t border-slate-600 flex justify-end">
+        <div className="px-6 py-3 border-t border-gray-200 dark:border-slate-600 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-gray-300 hover:text-white transition"
+            className="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white transition"
           >
             Cancel
           </button>

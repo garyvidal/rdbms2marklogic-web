@@ -45,12 +45,12 @@ export function LayoutControls({ onLayout, disabled }: LayoutControlsProps) {
         <div
             data-layout-controls
             style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
-            className="bg-slate-800 border border-slate-600 rounded shadow-lg min-w-[170px]"
+            className="bg-white border border-gray-200 rounded shadow-lg min-w-[170px] dark:bg-slate-800 dark:border-slate-600"
         >
             {ALGORITHMS.map(algo => (
                 <button
                     key={algo.id}
-                    className="w-full text-left px-3 py-2 text-xs text-gray-200 hover:bg-slate-600 flex flex-col"
+                    className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-slate-600 flex flex-col"
                     onClick={() => {
                         setOpen(false);
                         onLayout(algo.id);
@@ -71,7 +71,7 @@ export function LayoutControls({ onLayout, disabled }: LayoutControlsProps) {
                 title="Auto-layout"
                 disabled={disabled}
                 onClick={handleToggle}
-                className={`p-1.5 rounded-none transition text-gray-300 disabled:opacity-40 flex items-center gap-1 text-xs ${open ? "bg-slate-600" : "bg-slate-800 hover:bg-slate-600"}`}
+                className={`p-1.5 rounded-none transition disabled:opacity-40 flex items-center gap-1 text-xs text-gray-700 dark:text-gray-300 ${open ? "bg-gray-300 dark:bg-slate-600" : "bg-gray-200 hover:bg-gray-300 dark:bg-slate-800 dark:hover:bg-slate-600"}`}
             >
                 <FaSitemap />
                 <span className="hidden sm:inline">Layout</span>

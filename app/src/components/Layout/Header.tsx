@@ -1,5 +1,6 @@
 import React from 'react'
-import { FaPlus, FaFolderOpen, FaDatabase } from 'react-icons/fa'
+import { FaPlus, FaFolderOpen, FaDatabase, FaSun, FaMoon, FaCube } from 'react-icons/fa'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface HeaderProps {
   onNewProject?: () => void;
@@ -9,17 +10,26 @@ interface HeaderProps {
 }
 
 function Header({ onNewProject, onOpenProject, onConnections, onMarkLogicConnections }: HeaderProps) {
+  const { theme, toggleTheme } = useTheme();
   return (
-    <nav className="bg-slate-800 dark:bg-gray-900 w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600 py-1">
+    <nav className="bg-white dark:bg-slate-900 w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600 py-1">
       <div className="flex flex-wrap justify-between items-center mx-auto p-4">
-        <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-          RDBMS 2 MarkLogic
+        <span className="self-center text-2xl font-semibold whitespace-nowrap text-gray-900 dark:text-white flex items-center gap-2">
+          <FaCube size={24} className="text-red-600" />
+          Data Migration Framework
         </span>
         <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-white text-sm rounded hover:bg-gray-100 dark:hover:bg-white/10 transition"
+            title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <FaSun size={14} /> : <FaMoon size={14} />}
+          </button>
           {onMarkLogicConnections && (
             <button
               onClick={onMarkLogicConnections}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-white/20 transition"
             >
               <FaDatabase className="text-amber-400" size={13} />
               MarkLogic
@@ -28,7 +38,7 @@ function Header({ onNewProject, onOpenProject, onConnections, onMarkLogicConnect
           {onConnections && (
             <button
               onClick={onConnections}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-white/20 transition"
             >
               <FaDatabase size={13} />
               Connections
@@ -37,7 +47,7 @@ function Header({ onNewProject, onOpenProject, onConnections, onMarkLogicConnect
           {onOpenProject && (
             <button
               onClick={onOpenProject}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm font-medium rounded hover:bg-slate-500 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white text-sm font-medium rounded hover:bg-gray-200 dark:hover:bg-white/20 transition"
             >
               <FaFolderOpen size={13} />
               Open Project

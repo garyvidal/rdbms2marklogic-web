@@ -41,7 +41,7 @@ const StepIndicator: React.FC<{ current: WizardStep }> = ({ current }) => {
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition
                 ${idx < currentIdx ? 'bg-green-600 text-white' : ''}
                 ${idx === currentIdx ? 'bg-blue-600 text-white' : ''}
-                ${idx > currentIdx ? 'bg-slate-600 text-gray-400' : ''}`}
+                ${idx > currentIdx ? 'bg-gray-200 text-gray-500 dark:bg-slate-600 dark:text-gray-400' : ''}`}
             >
               {idx < currentIdx ? <FaCheck size={12} /> : idx + 1}
             </div>
@@ -131,7 +131,7 @@ interface CreateProjectWizardProps {
 }
 
 const inputCls =
-  'w-full px-3 py-2 bg-slate-600 text-white border border-slate-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+  'w-full px-3 py-2 bg-white text-gray-800 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-600 dark:text-white dark:border-slate-500';
 
 const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSaved }) => {
   const [step, setStep] = useState<WizardStep>('name-connection');
@@ -336,12 +336,12 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-white">New Project</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-200 dark:border-slate-700">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white">New Project</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-700 dark:hover:text-white text-2xl leading-none">&times;</button>
         </div>
 
         {/* Step indicator */}
@@ -356,28 +356,28 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
           {step === 'name-connection' && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Project Name *</label>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Project Name *</label>
                 <input
                   type="text"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                   placeholder="My Project"
-                  className="w-full px-4 py-2.5 bg-slate-700 text-white border border-slate-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2.5 bg-white text-gray-800 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Database Connection *</label>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">Database Connection *</label>
                 <div className="flex gap-2 mb-3">
                   <button
                     onClick={() => handleConnectionModeChange('saved')}
-                    className={`px-4 py-1.5 rounded text-sm font-medium transition ${connectionMode === 'saved' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition ${connectionMode === 'saved' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-600 dark:text-gray-300 dark:hover:bg-slate-500'}`}
                   >
                     Use Saved
                   </button>
                   <button
                     onClick={() => handleConnectionModeChange('new')}
-                    className={`px-4 py-1.5 rounded text-sm font-medium transition ${connectionMode === 'new' ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-300 hover:bg-slate-500'}`}
+                    className={`px-4 py-1.5 rounded text-sm font-medium transition ${connectionMode === 'new' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-slate-600 dark:text-gray-300 dark:hover:bg-slate-500'}`}
                   >
                     New Connection
                   </button>
@@ -395,7 +395,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                         <select
                           value={selectedConnectionId ?? ''}
                           onChange={(e) => { setSelectedConnectionId(e.target.value || null); resetConnStatus(); }}
-                          className="w-full px-3 py-2 bg-slate-700 text-white border border-slate-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 bg-white text-gray-800 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600"
                         >
                           <option value="">— Select a connection —</option>
                           {savedConnections.map((sc) => (
@@ -403,7 +403,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                           ))}
                         </select>
                         {selectedSavedConn && (
-                          <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 rounded text-xs text-gray-400">
+                          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-slate-700 rounded text-xs text-gray-500 dark:text-gray-400">
                             <FaDatabase className="text-blue-400 shrink-0" size={12} />
                             <span className="truncate">
                               {selectedSavedConn.connection.type} &bull; {selectedSavedConn.connection.url}:{selectedSavedConn.connection.port} / {selectedSavedConn.connection.database}
@@ -420,11 +420,11 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
 
                 {/* New connection form */}
                 {connectionMode === 'new' && (
-                  <div className="space-y-3 bg-slate-700 p-4 rounded">
+                  <div className="space-y-3 bg-gray-50 dark:bg-slate-700 p-4 rounded border border-gray-200 dark:border-transparent">
 
                     {/* Database Type */}
                     <div>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">Database Type</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Database Type</label>
                       <select
                         value={newConn.dbType}
                         onChange={(e) => handleDbTypeChange(e.target.value as ConnectionType)}
@@ -446,7 +446,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                         onChange={(e) => handleNewConnChange('enterUriManually', e.target.checked)}
                         className="accent-blue-500 w-4 h-4"
                       />
-                      <label htmlFor="newConn-uriManual" className="text-sm text-gray-300 cursor-pointer">
+                      <label htmlFor="newConn-uriManual" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
                         Enter URI Manually
                       </label>
                     </div>
@@ -572,7 +572,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
 
                     {/* Postgres: SSL */}
                     {isPostgres && (
-                      <div className="border border-slate-600 rounded p-3 space-y-2">
+                      <div className="border border-gray-200 dark:border-slate-600 rounded p-3 space-y-2">
                         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">SSL</div>
                         <div className="flex items-center gap-3">
                           <input
@@ -582,7 +582,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                             onChange={(e) => handleNewConnChange('useSSL', e.target.checked)}
                             className="accent-blue-500 w-4 h-4"
                           />
-                          <label htmlFor="newConn-useSSL" className="text-sm text-gray-300 cursor-pointer">
+                          <label htmlFor="newConn-useSSL" className="text-sm text-gray-600 dark:text-gray-300 cursor-pointer">
                             Use SSL
                           </label>
                         </div>
@@ -605,11 +605,11 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                     )}
 
                     {/* Divider */}
-                    <hr className="border-slate-600" />
+                    <hr className="border-gray-200 dark:border-slate-600" />
 
                     {/* Connection Name */}
                     <div>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">Connection Name *</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Connection Name *</label>
                       <input
                         type="text"
                         value={newConn.name}
@@ -621,7 +621,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
 
                     {/* Environment */}
                     <div>
-                      <label className="block text-xs font-medium text-gray-300 mb-1">Environment</label>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Environment</label>
                       <select
                         value={newConn.environment}
                         onChange={(e) => handleNewConnChange('environment', e.target.value as ConnectionEnvironment)}
@@ -644,7 +644,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                       type="button"
                       onClick={handleTestConnection}
                       disabled={connStatus === 'testing' || (connectionMode === 'saved' && !selectedConnectionId)}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm rounded hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
                     >
                       {connStatus === 'testing' ? (
                         <><FaSpinner className="animate-spin" size={12} /> Testing...</>
@@ -725,20 +725,20 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
           {/* ── STEP 3: Review & Save ── */}
           {step === 'review' && (
             <div className="space-y-4">
-              <div className="bg-slate-700 rounded p-4 space-y-3">
+              <div className="bg-gray-50 dark:bg-slate-700 rounded p-4 space-y-3 border border-gray-200 dark:border-transparent">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Project Name</span>
-                  <span className="text-sm font-medium text-white">{projectName}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Project Name</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-white">{projectName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Connection</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Connection</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-white">
                     {selectedSavedConn?.name ?? newConn.name}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-400">Tables Selected</span>
-                  <span className="text-sm font-medium text-white">{totalSelected}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Tables Selected</span>
+                  <span className="text-sm font-medium text-gray-800 dark:text-white">{totalSelected}</span>
                 </div>
               </div>
 
@@ -746,17 +746,17 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
                 {Object.entries(selectedTables)
                   .filter(([, s]) => s.size > 0)
                   .map(([schemaName, tableSet]) => (
-                    <div key={schemaName} className="bg-slate-700 rounded p-3">
+                    <div key={schemaName} className="bg-gray-50 dark:bg-slate-700 rounded p-3 border border-gray-200 dark:border-transparent">
                       <div className="flex items-center gap-2 mb-2">
                         <FaFolder className="text-yellow-500" size={13} />
-                        <span className="text-sm font-semibold text-white">{schemaName}</span>
-                        <span className="text-xs text-gray-400 ml-auto">
+                        <span className="text-sm font-semibold text-gray-800 dark:text-white">{schemaName}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
                           {tableSet.size} table{tableSet.size !== 1 ? 's' : ''}
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         {[...tableSet].sort().map((t) => (
-                          <span key={t} className="text-xs bg-slate-600 text-blue-300 px-2 py-0.5 rounded">
+                          <span key={t} className="text-xs bg-blue-50 text-blue-700 dark:bg-slate-600 dark:text-blue-300 px-2 py-0.5 rounded">
                             {t}
                           </span>
                         ))}
@@ -773,12 +773,12 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-700 mt-2">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 mt-2">
           <div>
             {step !== 'name-connection' && (
               <button
                 onClick={handleBack}
-                className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
               >
                 Back
               </button>
@@ -787,7 +787,7 @@ const CreateProjectWizard: React.FC<CreateProjectWizardProps> = ({ onClose, onSa
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 text-sm dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
             >
               Cancel
             </button>
@@ -858,9 +858,9 @@ const SchemaTreeNode: React.FC<SchemaTreeNodeProps> = ({
   }, [someSelected]);
 
   return (
-    <div className="bg-slate-700 rounded overflow-hidden">
+    <div className="bg-gray-50 dark:bg-slate-700 rounded overflow-hidden border border-gray-200 dark:border-transparent">
       <div
-        className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-500 cursor-pointer select-none"
+        className="flex items-center gap-2 px-3 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 cursor-pointer select-none"
         onClick={onToggleSchema}
       >
         <input
@@ -872,14 +872,14 @@ const SchemaTreeNode: React.FC<SchemaTreeNodeProps> = ({
           onClick={(e) => e.stopPropagation()}
         />
         <FaFolder className="text-yellow-500" size={14} />
-        <span className="text-sm font-semibold text-white flex-1">{schemaName}</span>
-        <span className="text-xs text-gray-400">{selectedCount}/{tableNames.length}</span>
+        <span className="text-sm font-semibold text-gray-800 dark:text-white flex-1">{schemaName}</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">{selectedCount}/{tableNames.length}</span>
       </div>
-      <div className="divide-y divide-slate-600/40">
+      <div className="divide-y divide-gray-200 dark:divide-slate-600/40">
         {tableNames.map((tableName) => (
           <div
             key={tableName}
-            className="flex items-center gap-2 px-3 py-1.5 pl-8 hover:bg-slate-600 cursor-pointer select-none"
+            className="flex items-center gap-2 px-3 py-1.5 pl-8 hover:bg-gray-100 dark:hover:bg-slate-600 cursor-pointer select-none"
             onClick={() => onToggleTable(tableName)}
           >
             <input
@@ -890,7 +890,7 @@ const SchemaTreeNode: React.FC<SchemaTreeNodeProps> = ({
               onClick={(e) => e.stopPropagation()}
             />
             <FaTable className="text-blue-400" size={11} />
-            <span className="text-sm text-gray-200">{tableName}</span>
+            <span className="text-sm text-gray-700 dark:text-gray-200">{tableName}</span>
           </div>
         ))}
       </div>

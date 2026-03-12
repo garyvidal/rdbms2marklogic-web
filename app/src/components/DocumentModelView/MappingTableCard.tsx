@@ -100,15 +100,15 @@ function FunctionTextarea({ value, onChange, fieldNames, placeholder, rows = 5, 
                 className={className}
             />
             {suggestions.length > 0 && (
-                <div className="absolute left-0 right-0 z-50 bg-slate-800 border border-amber-700 rounded shadow-lg overflow-hidden mt-0.5">
+                <div className="absolute left-0 right-0 z-50 bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded shadow-lg overflow-hidden mt-0.5">
                     {suggestions.map((s, idx) => (
                         <div
                             key={s}
                             onMouseDown={e => { e.preventDefault(); applySuggestion(s); }}
                             className={`px-2 py-1 text-xs font-mono cursor-pointer ${
                                 idx === selectedIdx
-                                    ? 'bg-amber-900/60 text-amber-200'
-                                    : 'text-green-300 hover:bg-slate-700'
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200'
+                                    : 'text-green-700 hover:bg-gray-50 dark:text-green-300 dark:hover:bg-slate-700'
                             }`}
                         >
                             {s}
@@ -153,17 +153,17 @@ const BADGE_LABEL: Record<string, string> = {
 };
 
 const HEADER_BG: Record<string, string> = {
-    RootElement:   'bg-cyan-900/40',
-    Elements:      'bg-slate-600',
-    InlineElement: 'bg-violet-900/40',
-    CUSTOM:        'bg-amber-900/30',
+    RootElement:   'bg-cyan-50 dark:bg-cyan-900/40',
+    Elements:      'bg-gray-100 dark:bg-slate-600',
+    InlineElement: 'bg-violet-50 dark:bg-violet-900/40',
+    CUSTOM:        'bg-amber-50 dark:bg-amber-900/30',
 };
 
 const ACCENT: Record<string, string> = {
-    RootElement:   'text-cyan-300',
-    Elements:      'text-gray-200',
-    InlineElement: 'text-violet-300',
-    CUSTOM:        'text-amber-300',
+    RootElement:   'text-cyan-700 dark:text-cyan-300',
+    Elements:      'text-gray-700 dark:text-gray-200',
+    InlineElement: 'text-violet-700 dark:text-violet-300',
+    CUSTOM:        'text-amber-700 dark:text-amber-300',
 };
 
 const DND_KEY = 'application/x-row-index';
@@ -298,11 +298,11 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
         ) : null;
 
     return (
-        <div className="bg-slate-700 rounded border border-slate-600 overflow-hidden">
+        <div className="bg-white dark:bg-slate-700 rounded border border-gray-200 dark:border-slate-600 overflow-hidden">
 
             {/* ── Compact header ───────────────────────────────────────────── */}
             <div className={`flex items-center gap-2 px-3 py-2 ${headerBg}`}>
-                <span className={`text-xs font-bold px-1.5 py-0.5 rounded bg-slate-800 shrink-0 ${accent}`}>
+                <span className={`text-xs font-bold px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-gray-200 dark:border-transparent shrink-0 ${accent}`}>
                     {badge}
                 </span>
 
@@ -333,8 +333,8 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                     title={settingsOpen ? 'Close settings' : 'Edit settings'}
                     className={`shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition border ${
                         settingsOpen
-                            ? 'border-slate-400 bg-slate-600 text-white'
-                            : 'border-slate-600 bg-transparent text-gray-400 hover:text-gray-200 hover:border-slate-500'
+                            ? 'border-gray-400 bg-gray-200 text-gray-800 dark:border-slate-400 dark:bg-slate-600 dark:text-white'
+                            : 'border-gray-300 bg-transparent text-gray-500 hover:text-gray-700 hover:border-gray-400 dark:border-slate-600 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-slate-500'
                     }`}
                 >
                     {settingsOpen ? <FaChevronUp size={9} /> : <FaChevronDown size={9} />}
@@ -351,15 +351,15 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
 
             {/* ── Settings panel ────────────────────────────────────────────── */}
             {settingsOpen && (
-                <div className="px-4 py-3 border-b border-slate-600 bg-slate-800/70 space-y-3">
+                <div className="px-4 py-3 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-800/70 space-y-3">
 
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-gray-500 w-24 shrink-0">Element Name</label>
+                        <label className="text-xs text-gray-500 dark:text-gray-500 w-24 shrink-0">Element Name</label>
                         <span className="text-xs text-gray-500">&lt;</span>
                         <input
                             value={mapping.xmlName}
                             onChange={e => onChange({ ...mapping, xmlName: e.target.value })}
-                            className="flex-1 min-w-0 bg-slate-700 border border-slate-500 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                            className="flex-1 min-w-0 bg-white border border-gray-300 rounded px-2 py-1 text-xs font-mono text-gray-800 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:bg-slate-700 dark:border-slate-500 dark:text-white"
                         />
                         <span className="text-xs text-gray-500">&gt;</span>
                     </div>
@@ -396,7 +396,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                                         value={mapping.wrapperElementName ?? ''}
                                         onChange={e => onChange({ ...mapping, wrapperElementName: e.target.value })}
                                         placeholder="wrapperElement"
-                                        className="flex-1 min-w-0 bg-slate-700 border border-slate-500 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                                        className="flex-1 min-w-0 bg-white border border-gray-300 rounded px-2 py-1 text-xs font-mono text-gray-800 focus:outline-none focus:ring-1 focus:ring-cyan-500 dark:bg-slate-700 dark:border-slate-500 dark:text-white"
                                     />
                                     <span className="text-xs text-gray-500">&gt;</span>
                                 </div>
@@ -463,10 +463,10 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                                 onDragOver={e => handleDragOver(e, i)}
                                 onDrop={e => handleDrop(e, i)}
                                 onDragEnd={resetDrag}
-                                className={`flex items-center gap-2 px-2 py-1.5 text-xs border-t border-slate-600/40 transition-colors group select-none ${
+                                className={`flex items-center gap-2 px-2 py-1.5 text-xs border-t border-gray-100 dark:border-slate-600/40 transition-colors group select-none ${
                                     isDragging
-                                        ? 'opacity-30 bg-slate-500/30'
-                                        : 'hover:bg-slate-600/50'
+                                        ? 'opacity-30 bg-gray-200/50 dark:bg-slate-500/30'
+                                        : 'hover:bg-gray-50 dark:hover:bg-slate-600/50'
                                 }`}
                             >
                                 {/* Grip handle — only this activates drag */}
@@ -509,7 +509,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                                     onChange={e => updateXmlName(i, e.target.value)}
                                     readOnly={isRef}
                                     onMouseDown={e => e.stopPropagation()}
-                                    className={`flex-1 min-w-0 bg-transparent font-mono text-white focus:outline-none rounded px-1 ${
+                                    className={`flex-1 min-w-0 bg-transparent font-mono text-gray-800 dark:text-white focus:outline-none rounded px-1 ${
                                         isRef ? 'text-gray-400 cursor-default' : 'focus:ring-1 focus:ring-cyan-500'
                                     }`}
                                 />
@@ -565,10 +565,10 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
 
                             {/* Relational info panel — DB columns only */}
                             {!isCustomCol && !isRef && expandedSourceIndex === i && (
-                                <div className="px-3 py-2 bg-slate-800/60 border-t border-slate-600/50 flex items-center gap-4">
+                                <div className="px-3 py-2 bg-gray-50 dark:bg-slate-800/60 border-t border-gray-100 dark:border-slate-600/50 flex items-center gap-4">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-xs text-gray-500">Column</span>
-                                        <span className="text-xs font-mono text-gray-300 bg-slate-700 px-1.5 py-0.5 rounded" title={col.sourceColumn}>
+                                        <span className="text-xs font-mono text-gray-700 bg-gray-100 dark:text-gray-300 dark:bg-slate-700 px-1.5 py-0.5 rounded" title={col.sourceColumn}>
                                             {col.sourceColumn}
                                         </span>
                                     </div>
@@ -583,7 +583,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
 
                             {/* Inline function editor */}
                             {isCustomCol && expandedFnIndex === i && (
-                                <div className="px-3 pb-2 pt-1 bg-slate-800/60 border-t border-amber-900/40">
+                                <div className="px-3 pb-2 pt-1 bg-gray-50 dark:bg-slate-800/60 border-t border-amber-100 dark:border-amber-900/40">
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="text-xs text-gray-500">Return Type</span>
                                         <select
@@ -631,7 +631,7 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                 )}
 
                 {/* Add custom field */}
-                <div className="px-2 py-2 border-t border-slate-600/40">
+                <div className="px-2 py-2 border-t border-gray-100 dark:border-slate-600/40">
                     <button
                         onClick={addCustomField}
                         onMouseDown={e => e.stopPropagation()}

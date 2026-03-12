@@ -201,22 +201,24 @@ export default function JsonDocumentModelView({
                     onClick={handleDismissPopover}
                 >
                     <div
-                        className="bg-slate-700 rounded-lg shadow-2xl border border-slate-500 w-80 p-4"
+                        className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-500 w-80 p-4"
                         onClick={e => e.stopPropagation()}
                     >
                         {popoverStep === 'type' ? (
                             <>
-                                <p className="text-sm font-semibold text-white mb-1">
-                                    Add <span className="text-cyan-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-white mb-1">
+                                    Add <span className="text-cyan-600 dark:text-cyan-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span>
                                 </p>
-                                <p className="text-xs text-gray-400 mb-4">How should this table appear in the JSON document model?</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">How should this table appear in the JSON document model?</p>
                                 <div className="space-y-2">
                                     <button
                                         onClick={() => handleAddMapping('RootObject')}
                                         disabled={!!root}
                                         className="w-full text-left px-4 py-3 rounded border transition
-                                            enabled:border-cyan-600 enabled:bg-cyan-900/30 enabled:hover:bg-cyan-900/60 enabled:text-white
-                                            disabled:border-slate-600 disabled:bg-slate-800 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:border-cyan-500 enabled:bg-cyan-50 enabled:hover:bg-cyan-100 enabled:text-gray-800
+                                            dark:enabled:border-cyan-600 dark:enabled:bg-cyan-900/30 dark:enabled:hover:bg-cyan-900/60 dark:enabled:text-white
+                                            disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
                                     >
                                         <div className="font-semibold text-sm">Root Object</div>
                                         <div className="text-xs mt-0.5 text-gray-400">
@@ -225,7 +227,7 @@ export default function JsonDocumentModelView({
                                     </button>
                                     <button
                                         onClick={() => handleAddMapping('Array')}
-                                        className="w-full text-left px-4 py-3 rounded border border-slate-500 bg-slate-800 hover:border-slate-400 hover:bg-slate-700 text-white transition"
+                                        className="w-full text-left px-4 py-3 rounded border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 text-gray-800 dark:border-slate-500 dark:bg-slate-800 dark:hover:border-slate-400 dark:hover:bg-slate-700 dark:text-white transition"
                                     >
                                         <div className="font-semibold text-sm">Array</div>
                                         <div className="text-xs mt-0.5 text-gray-400">Creates a nested array of child objects</div>
@@ -238,8 +240,10 @@ export default function JsonDocumentModelView({
                                         }}
                                         disabled={validParentOptions.length === 0}
                                         className="w-full text-left px-4 py-3 rounded border transition
-                                            enabled:border-violet-600 enabled:bg-violet-900/30 enabled:hover:bg-violet-900/60 enabled:text-white
-                                            disabled:border-slate-600 disabled:bg-slate-800 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:border-violet-400 enabled:bg-violet-50 enabled:hover:bg-violet-100 enabled:text-gray-800
+                                            dark:enabled:border-violet-600 dark:enabled:bg-violet-900/30 dark:enabled:hover:bg-violet-900/60 dark:enabled:text-white
+                                            disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
                                     >
                                         <div className="font-semibold text-sm">Inline Object</div>
                                         <div className="text-xs mt-0.5 text-gray-400">
@@ -251,15 +255,15 @@ export default function JsonDocumentModelView({
                                         </div>
                                     </button>
                                 </div>
-                                <button onClick={handleDismissPopover} className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-300 transition">
+                                <button onClick={handleDismissPopover} className="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition">
                                     Cancel
                                 </button>
                             </>
                         ) : (
                             <>
-                                <p className="text-sm font-semibold text-white mb-1">Select Parent</p>
-                                <p className="text-xs text-gray-400 mb-3">
-                                    <span className="text-violet-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span> will be nested inside:
+                                <p className="text-sm font-semibold text-gray-800 dark:text-white mb-1">Select Parent</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                    <span className="text-violet-600 dark:text-violet-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span> will be nested inside:
                                 </p>
                                 <div className="space-y-1 mb-4">
                                     {parentOptions.map(p => (
@@ -269,21 +273,21 @@ export default function JsonDocumentModelView({
                                             disabled={!p.hasRelationship}
                                             className={`w-full text-left px-3 py-2 rounded border text-sm font-mono transition ${
                                                 !p.hasRelationship
-                                                    ? 'border-slate-700 bg-slate-800/40 text-gray-600 cursor-not-allowed'
+                                                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800/40 dark:text-gray-600'
                                                     : inlineParentRef === p.id
-                                                        ? 'border-violet-500 bg-violet-900/40 text-violet-200'
-                                                        : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-400'
+                                                        ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-900/40 dark:text-violet-200'
+                                                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-300 dark:hover:border-slate-400'
                                             }`}
                                         >
                                             {p.label}
-                                            {!p.hasRelationship && <span className="ml-2 text-xs text-gray-600 font-sans">no relationship</span>}
+                                            {!p.hasRelationship && <span className="ml-2 text-xs text-gray-400 dark:text-gray-600 font-sans">no relationship</span>}
                                         </button>
                                     ))}
                                 </div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setPopoverStep('type')}
-                                        className="flex-1 px-3 py-1.5 text-xs rounded border border-slate-600 text-gray-400 hover:text-white hover:border-slate-400 transition"
+                                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-500 hover:text-gray-800 hover:border-gray-400 dark:border-slate-600 dark:text-gray-400 dark:hover:text-white dark:hover:border-slate-400 transition"
                                     >
                                         Back
                                     </button>
@@ -291,8 +295,10 @@ export default function JsonDocumentModelView({
                                         onClick={() => handleAddMapping('InlineObject', inlineParentRef)}
                                         disabled={!inlineParentRef || !validParentOptions.some(p => p.id === inlineParentRef)}
                                         className="flex-1 px-3 py-1.5 text-xs font-semibold rounded transition
-                                            enabled:bg-violet-700 enabled:hover:bg-violet-600 enabled:text-white
-                                            disabled:bg-slate-700 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:bg-violet-600 enabled:hover:bg-violet-500 enabled:text-white
+                                            dark:enabled:bg-violet-700 dark:enabled:hover:bg-violet-600
+                                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:bg-slate-700 dark:disabled:text-gray-600"
                                     >
                                         Add Inline
                                     </button>
@@ -320,7 +326,7 @@ export default function JsonDocumentModelView({
                         <div>
                             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">Root Object</div>
                             <div ref={el => el ? cardRefs.current.set(key, el) : cardRefs.current.delete(key)}
-                                 className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}>
+                                 className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : ''}>
                                 <JsonMappingTableCard mapping={root} onChange={handleCardChange} onRemove={handleRemoveRoot} />
                             </div>
                         </div>
@@ -339,7 +345,7 @@ export default function JsonDocumentModelView({
                                     <div
                                         key={`${el.sourceSchema}.${el.sourceTable}.${el.mappingType}.${i}`}
                                         ref={div => div ? cardRefs.current.set(key, div) : cardRefs.current.delete(key)}
-                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}
+                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : ''}
                                     >
                                         <JsonMappingTableCard
                                             mapping={el}

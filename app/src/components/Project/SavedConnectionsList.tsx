@@ -68,15 +68,15 @@ const SavedConnectionsList: React.FC<SavedConnectionsListProps> = ({ onConnectio
 
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-semibold text-gray-300 mb-3">Saved Connections ({savedConnections.length})</h4>
+      <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">Saved Connections ({savedConnections.length})</h4>
       {savedConnections.map((savedConn) => (
         <div
           key={savedConn.name}
-          className="flex items-center justify-between bg-slate-600 p-3 rounded hover:bg-slate-500 transition"
+          className="flex items-center justify-between bg-gray-100 dark:bg-slate-600 p-3 rounded hover:bg-gray-200 dark:hover:bg-slate-500 transition"
         >
           <button
             onClick={() => onConnectionSelect(savedConn.connection)}
-            className="flex items-center gap-2 flex-1 text-left text-sm text-white hover:text-blue-300 transition"
+            className="flex items-center gap-2 flex-1 text-left text-sm text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-300 transition"
           >
             <FaLink className="text-blue-400" />
             <div>

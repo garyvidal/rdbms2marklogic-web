@@ -242,33 +242,33 @@ export default function DocumentModelView({
     // When the JSON tab is active, delegate rendering to JsonDocumentModelView
     if ((showJsonOnly || showBothTabs) && activeTab === 'json') {
         return (
-            <div className="flex flex-col h-full bg-slate-800 text-white relative overflow-hidden">
+            <div className="flex flex-col h-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white relative overflow-hidden">
                 {/* Header bar with tabs */}
-                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-600 shrink-0">
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-                        <FaFileCode size={14} className="text-cyan-400" />
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-[#1b2a3b] shrink-0">
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <FaFileCode size={14} className="text-cyan-500 dark:text-cyan-400" />
                         Document Model
-                        <span className="text-xs text-gray-500">— {project.name}</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-300">— {project.name}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         {showBothTabs && (
-                            <div className="flex items-center gap-1 bg-slate-900 rounded p-0.5">
+                            <div className="flex items-center gap-1 bg-gray-200 dark:bg-slate-900 rounded p-0.5">
                                 <button onClick={() => setActiveTab('xml')}
-                                    className="px-3 py-1 text-xs rounded text-gray-400 hover:text-white transition">
+                                    className="px-3 py-1 text-xs rounded text-gray-700 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white transition">
                                     XML
                                 </button>
-                                <button className="px-3 py-1 text-xs rounded bg-slate-600 text-white">
+                                <button className="px-3 py-1 text-xs rounded bg-white text-gray-800 dark:bg-slate-600 dark:text-white">
                                     JSON
                                 </button>
                             </div>
                         )}
                         {!showBothTabs && (
-                            <span className="text-xs text-gray-500 font-mono">JSON</span>
+                            <span className="text-xs text-gray-600 dark:text-gray-300 font-mono">JSON</span>
                         )}
                         <button
                             onClick={() => setShowPreview(true)}
                             title="Preview generated JSON"
-                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-600 text-gray-400 hover:border-amber-500 hover:text-amber-300 hover:bg-amber-900/20 transition"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-gray-300 text-gray-700 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:border-slate-600 dark:text-gray-300 dark:hover:border-amber-500 dark:hover:text-amber-300 dark:hover:bg-amber-900/20 transition"
                         >
                             <SiJson size={10} />
                             Preview JSON
@@ -291,34 +291,34 @@ export default function DocumentModelView({
     }
 
     return (
-        <div className="flex flex-col h-full bg-slate-800 text-white relative overflow-hidden">
+        <div className="flex flex-col h-full bg-white dark:bg-slate-800 text-gray-800 dark:text-white relative overflow-hidden">
             {/* Header bar */}
-            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-600 shrink-0">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-                    <FaFileCode size={14} className="text-cyan-400" />
+            <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-[#1b2a3b] shrink-0">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <FaFileCode size={14} className="text-cyan-500 dark:text-cyan-400" />
                     Document Model
-                    <span className="text-xs text-gray-500">— {project.name}</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-500">— {project.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     {showBothTabs && (
-                        <div className="flex items-center gap-1 bg-slate-900 rounded p-0.5">
-                            <button className="px-3 py-1 text-xs rounded bg-slate-600 text-white">
+                        <div className="flex items-center gap-1 bg-gray-200 dark:bg-slate-900 rounded p-0.5">
+                            <button className="px-3 py-1 text-xs rounded bg-white text-gray-800 dark:bg-slate-600 dark:text-white">
                                 XML
                             </button>
                             <button onClick={() => setActiveTab('json')}
-                                className="px-3 py-1 text-xs rounded text-gray-400 hover:text-white transition">
+                                className="px-3 py-1 text-xs rounded text-gray-700 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white transition">
                                 JSON
                             </button>
                         </div>
                     )}
                     {hasMapping && (
-                        <span className="text-xs text-gray-500">{elementCountLabel}</span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">{elementCountLabel}</span>
                     )}
                     {hasMapping && (
                         <button
                             onClick={() => setShowPreview(true)}
                             title="Preview generated XML"
-                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-slate-600 text-gray-400 hover:border-cyan-500 hover:text-cyan-300 hover:bg-cyan-900/20 transition"
+                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded border border-gray-300 text-gray-700 hover:border-cyan-500 hover:text-cyan-600 hover:bg-cyan-50 dark:border-slate-600 dark:text-gray-300 dark:hover:border-cyan-500 dark:hover:text-cyan-300 dark:hover:bg-cyan-900/20 transition"
                         >
                             <FaCode size={10} />
                             Preview XML
@@ -338,25 +338,27 @@ export default function DocumentModelView({
                     onClick={handleDismissPopover}
                 >
                     <div
-                        className="bg-slate-700 rounded-lg shadow-2xl border border-slate-500 w-80 p-4"
+                        className="bg-white dark:bg-slate-700 rounded-lg shadow-2xl border border-gray-200 dark:border-slate-500 w-80 p-4"
                         onClick={e => e.stopPropagation()}
                     >
                         {popoverStep === 'type' ? (
                             <>
-                                <p className="text-sm font-semibold text-white mb-1">
-                                    Add <span className="text-cyan-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span>
+                                <p className="text-sm font-semibold text-gray-800 dark:text-white mb-1">
+                                    Add <span className="text-cyan-600 dark:text-cyan-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span>
                                 </p>
-                                <p className="text-xs text-gray-400 mb-4">How should this table appear in the XML document model?</p>
+                                <p className="text-xs text-gray-700 dark:text-gray-200 mb-4">How should this table appear in the XML document model?</p>
                                 <div className="space-y-2">
                                     <button
                                         onClick={() => handleAddMapping('RootElement')}
                                         disabled={!!root}
                                         className="w-full text-left px-4 py-3 rounded border transition
-                                            enabled:border-cyan-600 enabled:bg-cyan-900/30 enabled:hover:bg-cyan-900/60 enabled:text-white
-                                            disabled:border-slate-600 disabled:bg-slate-800 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:border-cyan-500 enabled:bg-cyan-50 enabled:hover:bg-cyan-100 enabled:text-gray-800
+                                            dark:enabled:border-cyan-600 dark:enabled:bg-cyan-900/30 dark:enabled:hover:bg-cyan-900/60 dark:enabled:text-white
+                                            disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
                                     >
                                         <div className="font-semibold text-sm">Root Element</div>
-                                        <div className="text-xs mt-0.5 text-gray-400">
+                                        <div className="text-xs mt-0.5 text-gray-400 dark:text-gray-400">
                                             {root
                                                 ? `Root already set to <${root.xmlName}>`
                                                 : 'Creates the top-level XML element for each row'}
@@ -364,7 +366,7 @@ export default function DocumentModelView({
                                     </button>
                                     <button
                                         onClick={() => handleAddMapping('Elements')}
-                                        className="w-full text-left px-4 py-3 rounded border border-slate-500 bg-slate-800 hover:border-slate-400 hover:bg-slate-700 text-white transition"
+                                        className="w-full text-left px-4 py-3 rounded border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 text-gray-800 dark:border-slate-500 dark:bg-slate-800 dark:hover:border-slate-400 dark:hover:bg-slate-700 dark:text-white transition"
                                     >
                                         <div className="font-semibold text-sm">Elements</div>
                                         <div className="text-xs mt-0.5 text-gray-400">Creates a nested sequence of child elements</div>
@@ -373,8 +375,10 @@ export default function DocumentModelView({
                                         onClick={handleInlineElementClick}
                                         disabled={validParentOptions.length === 0}
                                         className="w-full text-left px-4 py-3 rounded border transition
-                                            enabled:border-violet-600 enabled:bg-violet-900/30 enabled:hover:bg-violet-900/60 enabled:text-white
-                                            disabled:border-slate-600 disabled:bg-slate-800 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:border-violet-400 enabled:bg-violet-50 enabled:hover:bg-violet-100 enabled:text-gray-800
+                                            dark:enabled:border-violet-600 dark:enabled:bg-violet-900/30 dark:enabled:hover:bg-violet-900/60 dark:enabled:text-white
+                                            disabled:border-gray-200 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:border-slate-600 dark:disabled:bg-slate-800 dark:disabled:text-gray-600"
                                     >
                                         <div className="font-semibold text-sm">Inline Element</div>
                                         <div className="text-xs mt-0.5 text-gray-400">
@@ -388,16 +392,16 @@ export default function DocumentModelView({
                                 </div>
                                 <button
                                     onClick={handleDismissPopover}
-                                    className="mt-3 w-full text-center text-xs text-gray-500 hover:text-gray-300 transition"
+                                    className="mt-3 w-full text-center text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition"
                                 >
                                     Cancel
                                 </button>
                             </>
                         ) : (
                             <>
-                                <p className="text-sm font-semibold text-white mb-1">Select Parent</p>
-                                <p className="text-xs text-gray-400 mb-3">
-                                    <span className="text-violet-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span> will be nested inside:
+                                <p className="text-sm font-semibold text-gray-800 dark:text-white mb-1">Select Parent</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                    <span className="text-violet-600 dark:text-violet-300 font-mono">{pendingTable.schemaName}.{pendingTable.tableName}</span> will be nested inside:
                                 </p>
                                 <div className="space-y-1 mb-4">
                                     {parentOptions.map(p => (
@@ -408,15 +412,15 @@ export default function DocumentModelView({
                                             title={!p.hasRelationship ? 'No table relationship — create a synthetic join first' : undefined}
                                             className={`w-full text-left px-3 py-2 rounded border text-sm font-mono transition ${
                                                 !p.hasRelationship
-                                                    ? 'border-slate-700 bg-slate-800/40 text-gray-600 cursor-not-allowed'
+                                                    ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed dark:border-slate-700 dark:bg-slate-800/40 dark:text-gray-600'
                                                     : inlineParentRef === p.id
-                                                        ? 'border-violet-500 bg-violet-900/40 text-violet-200'
-                                                        : 'border-slate-600 bg-slate-800 text-gray-300 hover:border-slate-400'
+                                                        ? 'border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500 dark:bg-violet-900/40 dark:text-violet-200'
+                                                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-300 dark:hover:border-slate-400'
                                             }`}
                                         >
                                             <span>{p.label}</span>
                                             {!p.hasRelationship && (
-                                                <span className="ml-2 text-xs text-gray-600 font-sans">no relationship</span>
+                                                <span className="ml-2 text-xs text-gray-400 dark:text-gray-600 font-sans">no relationship</span>
                                             )}
                                         </button>
                                     ))}
@@ -424,7 +428,7 @@ export default function DocumentModelView({
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setPopoverStep('type')}
-                                        className="flex-1 px-3 py-1.5 text-xs rounded border border-slate-600 text-gray-400 hover:text-white hover:border-slate-400 transition"
+                                        className="flex-1 px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-500 hover:text-gray-800 hover:border-gray-400 dark:border-slate-600 dark:text-gray-400 dark:hover:text-white dark:hover:border-slate-400 transition"
                                     >
                                         Back
                                     </button>
@@ -432,8 +436,10 @@ export default function DocumentModelView({
                                         onClick={() => handleAddMapping('InlineElement', inlineParentRef)}
                                         disabled={!inlineParentRef || !validParentOptions.some(p => p.id === inlineParentRef)}
                                         className="flex-1 px-3 py-1.5 text-xs font-semibold rounded transition
-                                            enabled:bg-violet-700 enabled:hover:bg-violet-600 enabled:text-white
-                                            disabled:bg-slate-700 disabled:text-gray-600 disabled:cursor-not-allowed"
+                                            enabled:bg-violet-600 enabled:hover:bg-violet-500 enabled:text-white
+                                            dark:enabled:bg-violet-700 dark:enabled:hover:bg-violet-600
+                                            disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed
+                                            dark:disabled:bg-slate-700 dark:disabled:text-gray-600"
                                     >
                                         Add Inline
                                     </button>
@@ -465,7 +471,7 @@ export default function DocumentModelView({
                             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1">Root Element</div>
                             <div
                                 ref={el => el ? cardRefs.current.set(key, el) : cardRefs.current.delete(key)}
-                                className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}
+                                className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : ''}
                             >
                                 <MappingTableCard
                                     mapping={root}
@@ -493,7 +499,7 @@ export default function DocumentModelView({
                                     <div
                                         key={`${el.sourceSchema}.${el.sourceTable}.${el.mappingType}.${i}`}
                                         ref={div => div ? cardRefs.current.set(key, div) : cardRefs.current.delete(key)}
-                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-800' : ''}
+                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : ''}
                                     >
                                         <MappingTableCard
                                             mapping={el}
