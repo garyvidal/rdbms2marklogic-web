@@ -97,6 +97,8 @@ function getAvailableColumns(
 
 type PopoverStep = 'type' | 'inline-parent';
 
+const DND_CARD_KEY = 'application/x-card-index';
+
 export default function DocumentModelView({
     project,
     pendingTable,
@@ -109,6 +111,11 @@ export default function DocumentModelView({
     const { root, elements } = mapping.documentModel;
 
     const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+    // Drag-and-drop state for reordering normalElements
+    const [dragCardIdx, setDragCardIdx] = useState<number | null>(null);
+    // dropLineIdx = insert-before index (0..normalElements.length); null = no active drop
+    const [dropLineIdx, setDropLineIdx] = useState<number | null>(null);
 
     // Scroll to and briefly highlight a card when a mapped node is clicked on the diagram.
     React.useEffect(() => {
@@ -242,6 +249,35 @@ export default function DocumentModelView({
             mapping: { ...project.mapping, documentModel: { root, elements: updated } },
         });
     }, [project, root, elements, onMappingChange]);
+
+    /** Returns false if dropping dragIdx before targetIdx would violate constraints. */
+    const isCardDropValid = useCallback((dragIdx: number, targetIdx: number, normals: XmlTableMapping[]): boolean => {
+        // No-op positions
+        if (targetIdx === dragIdx || targetIdx === dragIdx + 1) return false;
+        const el = normals[dragIdx];
+        // InlineElement cannot go before its parent
+        if (el.mappingType === 'InlineElement' && el.parentRef) {
+            const parentIdx = normals.findIndex(e => e.id === el.parentRef);
+            if (parentIdx >= 0 && targetIdx <= parentIdx) return false;
+        }
+        return true;
+    }, []);
+
+    const handleCardDrop = useCallback((dragIdx: number, targetIdx: number) => {
+        const normals = (elements ?? []).filter(e => e.mappingType !== 'CUSTOM');
+        const customs = (elements ?? []).filter(e => e.mappingType === 'CUSTOM');
+        if (!isCardDropValid(dragIdx, targetIdx, normals)) return;
+
+        const newList = [...normals];
+        const [dragged] = newList.splice(dragIdx, 1);
+        const insertAt = targetIdx > dragIdx ? targetIdx - 1 : targetIdx;
+        newList.splice(insertAt, 0, dragged);
+
+        onMappingChange({
+            ...project,
+            mapping: { ...project.mapping, documentModel: { root, elements: [...newList, ...customs] } },
+        });
+    }, [elements, project, root, onMappingChange, isCardDropValid]);
 
     const resolveParentXmlName = (parentRef?: string): string | undefined => {
         if (!parentRef) return undefined;
@@ -515,31 +551,97 @@ export default function DocumentModelView({
                 {normalElements.length > 0 && (
                     <div>
                         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 px-1 mt-4">Elements</div>
-                        <div className="space-y-2">
+                        <div
+                            className="space-y-0"
+                            onDragOver={e => { if (e.dataTransfer.types.includes(DND_CARD_KEY)) e.preventDefault(); }}
+                            onDrop={e => {
+                                // Drop on the container itself (below last card)
+                                const src = e.dataTransfer.getData(DND_CARD_KEY);
+                                if (src === '') return;
+                                e.preventDefault();
+                                handleCardDrop(Number(src), normalElements.length);
+                                setDragCardIdx(null);
+                                setDropLineIdx(null);
+                            }}
+                            onDragLeave={e => {
+                                const target = e.currentTarget as HTMLElement;
+                                if (!target.contains(e.relatedTarget as Node)) setDropLineIdx(null);
+                            }}
+                        >
                             {normalElements.map((el, i) => {
-                                // Index in the full elements array for removal
                                 const fullIndex = (elements ?? []).indexOf(el);
                                 const key = `${el.sourceSchema}.${el.sourceTable}`;
                                 const isHighlighted = highlightedTable
                                     ? highlightedTable.schemaName === el.sourceSchema && highlightedTable.tableName === el.sourceTable
                                     : false;
+                                const isBeingDragged = dragCardIdx === i;
+                                const showLineBefore = dropLineIdx === i && dragCardIdx !== null && isCardDropValid(dragCardIdx, i, normalElements);
                                 return (
-                                    <div
-                                        key={`${el.sourceSchema}.${el.sourceTable}.${el.mappingType}.${i}`}
-                                        ref={div => div ? cardRefs.current.set(key, div) : cardRefs.current.delete(key)}
-                                        className={isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : ''}
-                                    >
-                                        <MappingTableCard
-                                            mapping={el}
-                                            onChange={handleCardChange}
-                                            onRemove={() => handleRemoveElement(fullIndex)}
-                                            parentXmlName={el.mappingType === 'InlineElement' ? resolveParentXmlName(el.parentRef) : undefined}
-                                            namespaces={mapping.namespaces ?? []}
-                                            availableColumns={getAvailableColumns(el, project)}
-                                        />
+                                    <div key={`${el.id ?? el.sourceTable}.${i}`}>
+                                        {/* Drop indicator line before this card */}
+                                        <div className={`h-0.5 mx-1 rounded transition-all ${showLineBefore ? 'bg-cyan-400 mb-1' : 'bg-transparent mb-0'}`} />
+                                        <div
+                                            ref={div => div ? cardRefs.current.set(key, div) : cardRefs.current.delete(key)}
+                                            className={[
+                                                'mb-2 flex items-stretch group/card',
+                                                isBeingDragged ? 'opacity-40' : '',
+                                                isHighlighted ? 'rounded ring-2 ring-cyan-400 ring-offset-1 ring-offset-white dark:ring-offset-slate-800' : '',
+                                            ].filter(Boolean).join(' ')}
+                                            onDragOver={e => {
+                                                if (!e.dataTransfer.types.includes(DND_CARD_KEY)) return;
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                const rect = e.currentTarget.getBoundingClientRect();
+                                                const midY = rect.top + rect.height / 2;
+                                                setDropLineIdx(e.clientY < midY ? i : i + 1);
+                                            }}
+                                            onDrop={e => {
+                                                const src = e.dataTransfer.getData(DND_CARD_KEY);
+                                                if (src === '') return;
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                handleCardDrop(Number(src), dropLineIdx ?? i);
+                                                setDragCardIdx(null);
+                                                setDropLineIdx(null);
+                                            }}
+                                        >
+                                            {/* Drag handle */}
+                                            <div
+                                                draggable
+                                                title="Drag to reorder"
+                                                className="flex items-center justify-center w-4 shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 dark:text-slate-600 dark:hover:text-slate-400 opacity-0 group-hover/card:opacity-100 transition-opacity select-none"
+                                                onDragStart={e => {
+                                                    setDragCardIdx(i);
+                                                    setDropLineIdx(null);
+                                                    e.dataTransfer.setData(DND_CARD_KEY, String(i));
+                                                    e.dataTransfer.effectAllowed = 'move';
+                                                }}
+                                                onDragEnd={() => {
+                                                    setDragCardIdx(null);
+                                                    setDropLineIdx(null);
+                                                }}
+                                            >
+                                                ⠿
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <MappingTableCard
+                                                    mapping={el}
+                                                    onChange={handleCardChange}
+                                                    onRemove={() => handleRemoveElement(fullIndex)}
+                                                    parentXmlName={el.mappingType === 'InlineElement' ? resolveParentXmlName(el.parentRef) : undefined}
+                                                    namespaces={mapping.namespaces ?? []}
+                                                    availableColumns={getAvailableColumns(el, project)}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 );
                             })}
+                            {/* Drop indicator line after the last card */}
+                            <div className={`h-0.5 mx-1 rounded transition-all ${
+                                dropLineIdx === normalElements.length && dragCardIdx !== null && isCardDropValid(dragCardIdx, normalElements.length, normalElements)
+                                    ? 'bg-cyan-400' : 'bg-transparent'
+                            }`} />
                         </div>
                     </div>
                 )}
