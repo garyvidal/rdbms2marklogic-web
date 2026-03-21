@@ -32,7 +32,9 @@
       "Bash(xargs grep -l \"XmlColumnMapping\\\\|XmlTableMapping\")",
       "Bash(xargs cat)",
       "Bash(mvn clean:*)",
-      "Bash(./mvnw clean:*)"
+      "Bash(./mvnw clean:*)",
+      "Bash(docker compose:*)",
+      "Bash(mvn spring-boot:run -q)"
     ]
   }
 }

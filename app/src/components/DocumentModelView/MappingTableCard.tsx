@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { FaTimes, FaTag, FaLayerGroup, FaLink, FaGripVertical, FaChevronDown, FaChevronUp, FaPlus, FaDatabase } from 'react-icons/fa';
-import type { XmlTableMapping, ColumnMappingType, XmlSchemaType } from '@/services/ProjectService';
+import type { XmlTableMapping, XmlColumnMapping, XmlNamespace, ColumnMappingType, XmlSchemaType } from '@/services/ProjectService';
 
 // ── FunctionTextarea: textarea with field-name autocomplete ───────────────────
 
@@ -120,12 +120,23 @@ function FunctionTextarea({ value, onChange, fieldNames, placeholder, rows = 5, 
     );
 }
 
+/** A DB column available for restore (deleted from mapping but still in schema). */
+export interface RestorableColumn {
+    name: string;
+    xmlName: string;
+    xmlType: XmlSchemaType;
+}
+
 interface MappingTableCardProps {
     mapping: XmlTableMapping;
     onChange: (updated: XmlTableMapping) => void;
     onRemove: () => void;
     /** Resolved xmlName of the parent mapping (for InlineElement display). */
     parentXmlName?: string;
+    /** Project-level namespace declarations available for prefix selection. */
+    namespaces?: XmlNamespace[];
+    /** All DB columns for this table (used to compute which columns can be restored). */
+    availableColumns?: RestorableColumn[];
 }
 
 const XML_TYPE_COLOR: Record<XmlSchemaType, string> = {
@@ -168,8 +179,13 @@ const ACCENT: Record<string, string> = {
 
 const DND_KEY = 'application/x-row-index';
 
-export default function MappingTableCard({ mapping, onChange, onRemove, parentXmlName }: MappingTableCardProps) {
+export default function MappingTableCard({ mapping, onChange, onRemove, parentXmlName, namespaces = [], availableColumns = [] }: MappingTableCardProps) {
     const [settingsOpen, setSettingsOpen] = useState(false);
+    /** Pending namespace prefix to propagate to columns — non-null triggers the cascade prompt. */
+    const [pendingNsPropagate, setPendingNsPropagate] = useState<string | null>(null);
+    /** Whether the restore-column dropdown is open. */
+    const [restoreOpen, setRestoreOpen] = useState(false);
+    const restoreRef = useRef<HTMLDivElement>(null);
     /** Index of custom field row whose fn editor is open (-1 = none). */
     const [expandedFnIndex, setExpandedFnIndex] = useState(-1);
     /** Index of DB column row whose relational info panel is open (-1 = none). */
@@ -184,6 +200,34 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
      * This prevents clicking an input from accidentally starting a drag.
      */
     const gripPressed = useRef(false);
+
+    // Close restore dropdown on outside click
+    React.useEffect(() => {
+        if (!restoreOpen) return;
+        const handler = (e: MouseEvent) => {
+            if (restoreRef.current && !restoreRef.current.contains(e.target as Node)) {
+                setRestoreOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [restoreOpen]);
+
+    // Columns present in schema but removed from this mapping
+    const mappedSourceCols = new Set(mapping.columns.map(c => c.sourceColumn));
+    const restorableColumns = availableColumns.filter(c => !mappedSourceCols.has(c.name));
+
+    const restoreColumn = (col: RestorableColumn) => {
+        const newCol: XmlColumnMapping = {
+            id: crypto.randomUUID(),
+            sourceColumn: col.name,
+            xmlName: col.xmlName,
+            xmlType: col.xmlType,
+            mappingType: 'Element',
+        };
+        onChange({ ...mapping, columns: [...mapping.columns, newCol] });
+        setRestoreOpen(false);
+    };
 
     const isInline = mapping.mappingType === 'InlineElement';
     const isCustom = mapping.mappingType === 'CUSTOM';
@@ -328,6 +372,40 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                     )}
                 </div>
 
+                {/* Restore deleted columns */}
+                {restorableColumns.length > 0 && !isCustom && (
+                    <div ref={restoreRef} className="relative shrink-0">
+                        <button
+                            onClick={() => setRestoreOpen(v => !v)}
+                            title="Restore a deleted column"
+                            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-xs transition border ${
+                                restoreOpen
+                                    ? 'border-cyan-500 bg-cyan-50 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 dark:border-cyan-600'
+                                    : 'border-gray-300 text-gray-500 hover:text-cyan-600 hover:border-cyan-500 dark:border-slate-600 dark:text-gray-400 dark:hover:text-cyan-300 dark:hover:border-cyan-600'
+                            }`}
+                        >
+                            <FaPlus size={8} />
+                            <span>{restorableColumns.length}</span>
+                        </button>
+                        {restoreOpen && (
+                            <div className="absolute right-0 top-full mt-1 z-30 min-w-[160px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-lg overflow-hidden">
+                                <div className="px-2 py-1 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-slate-700 font-medium">
+                                    Restore column
+                                </div>
+                                {restorableColumns.map(col => (
+                                    <button
+                                        key={col.name}
+                                        onClick={() => restoreColumn(col)}
+                                        className="w-full text-left px-3 py-1.5 text-xs font-mono text-gray-700 dark:text-gray-200 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 hover:text-cyan-700 dark:hover:text-cyan-300 transition"
+                                    >
+                                        {col.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <button
                     onClick={() => setSettingsOpen(v => !v)}
                     title={settingsOpen ? 'Close settings' : 'Edit settings'}
@@ -356,6 +434,30 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                     <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-500 dark:text-gray-500 w-24 shrink-0">Element Name</label>
                         <span className="text-xs text-gray-500">&lt;</span>
+                        {namespaces.length > 0 && (
+                            <select
+                                value={mapping.namespacePrefix ?? ''}
+                                onChange={e => {
+                                    const newPrefix = e.target.value || undefined;
+                                    onChange({ ...mapping, namespacePrefix: newPrefix });
+                                    // Offer to cascade to columns only when there are non-ref columns
+                                    const cascadable = mapping.columns.filter(c => c.mappingType !== 'CUSTOM' && c.sourceColumn !== '');
+                                    if (cascadable.length > 0) {
+                                        setPendingNsPropagate(newPrefix ?? '');
+                                    }
+                                }}
+                                title="Namespace prefix"
+                                className="shrink-0 bg-white border border-gray-300 rounded px-1 py-1 text-xs font-mono text-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-500 dark:bg-slate-700 dark:border-slate-500 dark:text-teal-300"
+                            >
+                                <option value="">—</option>
+                                {namespaces.filter(ns => ns.prefix).map(ns => (
+                                    <option key={ns.prefix} value={ns.prefix}>{ns.prefix}</option>
+                                ))}
+                            </select>
+                        )}
+                        {namespaces.length > 0 && mapping.namespacePrefix && (
+                            <span className="text-xs text-gray-400">:</span>
+                        )}
                         <input
                             value={mapping.xmlName}
                             onChange={e => onChange({ ...mapping, xmlName: e.target.value })}
@@ -363,6 +465,34 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                         />
                         <span className="text-xs text-gray-500">&gt;</span>
                     </div>
+
+                    {/* Cascade namespace prompt */}
+                    {pendingNsPropagate !== null && (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded border border-teal-300 bg-teal-50 dark:border-teal-700 dark:bg-teal-900/20">
+                            <span className="flex-1 text-xs text-teal-800 dark:text-teal-200">
+                                Apply <span className="font-mono font-semibold">{pendingNsPropagate || '(none)'}</span> prefix to all child columns too?
+                            </span>
+                            <button
+                                onClick={() => {
+                                    const updated = mapping.columns.map(c =>
+                                        c.mappingType === 'CUSTOM' || c.sourceColumn === '' ? c : { ...c, namespacePrefix: pendingNsPropagate || undefined }
+                                    );
+                                    onChange({ ...mapping, columns: updated });
+                                    setPendingNsPropagate(null);
+                                }}
+                                className="shrink-0 px-2 py-0.5 text-xs rounded bg-teal-600 hover:bg-teal-500 text-white font-medium transition"
+                            >
+                                Apply
+                            </button>
+                            <button
+                                onClick={() => setPendingNsPropagate(null)}
+                                className="shrink-0 text-teal-500 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-200 transition"
+                                title="Dismiss"
+                            >
+                                <FaTimes size={11} />
+                            </button>
+                        </div>
+                    )}
 
                     {isInline && (
                         <div className="flex items-center gap-2">
@@ -501,6 +631,25 @@ export default function MappingTableCard({ mapping, onChange, onRemove, parentXm
                                         }
                                         <span>{MAPPING_TYPE_LABELS[col.mappingType]}</span>
                                     </button>
+                                )}
+
+                                {/* Namespace prefix picker (column level) */}
+                                {!isRef && namespaces.length > 0 && (
+                                    <select
+                                        value={col.namespacePrefix ?? ''}
+                                        onChange={e => {
+                                            const val = e.target.value || undefined;
+                                            onChange({ ...mapping, columns: mapping.columns.map((c, ci) => ci !== i ? c : { ...c, namespacePrefix: val }) });
+                                        }}
+                                        onMouseDown={e => e.stopPropagation()}
+                                        title="Namespace prefix"
+                                        className="shrink-0 bg-transparent border border-slate-500 rounded px-1 py-0.5 text-xs font-mono text-teal-500 dark:text-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-500 cursor-pointer"
+                                    >
+                                        <option value="">ns</option>
+                                        {namespaces.filter(ns => ns.prefix).map(ns => (
+                                            <option key={ns.prefix} value={ns.prefix}>{ns.prefix}</option>
+                                        ))}
+                                    </select>
                                 )}
 
                                 {/* XML name */}

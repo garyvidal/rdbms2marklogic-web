@@ -12,9 +12,9 @@ interface HeaderProps {
 function Header({ onNewProject, onOpenProject, onConnections, onMarkLogicConnections }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   return (
-    <nav className="bg-white dark:bg-slate-900 w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600 py-1">
+    <nav className="bg-gray-900 dark:bg-slate-900 w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600 py-1">
       <div className="flex flex-wrap justify-between items-center mx-auto p-4">
-        <span className="self-center text-2xl font-semibold whitespace-nowrap text-gray-900 dark:text-white flex items-center gap-2">
+        <span className="self-center text-2xl font-semibold whitespace-nowrap text-white dark:text-white flex items-center gap-2">
           <FaCube size={24} className="text-red-600" />
           Data Migration Framework
         </span>

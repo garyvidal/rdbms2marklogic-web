@@ -65,6 +65,13 @@ export interface DiagramContainer {
   tabs: DiagramTab[];
 }
 
+export interface XmlNamespace {
+  /** Namespace prefix, e.g. "dc", "xs", "my". */
+  prefix: string;
+  /** Namespace URI, e.g. "http://purl.org/dc/elements/1.1/". */
+  uri: string;
+}
+
 export type XmlSchemaType =
   | 'xs:string'
   | 'xs:integer'
@@ -105,6 +112,8 @@ export interface XmlColumnMapping {
   mappingType: ColumnMappingType;
   /** Custom fields only: JavaScript function body that computes this field's value. */
   customFunction?: string;
+  /** Optional namespace prefix for this element or attribute. Must be declared in ProjectMapping.namespaces. */
+  namespacePrefix?: string;
 }
 
 export interface XmlTableMapping {
@@ -125,6 +134,8 @@ export interface XmlTableMapping {
   customFunction?: string;
   /** CUSTOM: the XSD type returned by the custom function. */
   xmlType?: XmlSchemaType;
+  /** Optional namespace prefix for this element. Must be declared in ProjectMapping.namespaces. */
+  namespacePrefix?: string;
   columns: XmlColumnMapping[];
 }
 
@@ -166,6 +177,8 @@ export interface ProjectMapping {
   };
   /** Which document type(s) to generate. Defaults to 'XML'. */
   mappingType?: MappingTargetType;
+  /** XML namespace declarations applied to all generated documents. */
+  namespaces?: XmlNamespace[];
 }
 
 export interface ProjectData {

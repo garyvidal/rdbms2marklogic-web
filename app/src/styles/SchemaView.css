@@ -50,10 +50,32 @@
     background-color: #555555;
   }
 
-  /* ReactFlow Controls Styling */
+  /* ReactFlow CSS custom property overrides — light mode */
+  :root {
+    --xy-controls-button-background-color-default: #ffffff;
+    --xy-controls-button-color-default: #374151;
+    --xy-controls-button-border-color-default: #d1d5db;
+    --xy-controls-button-background-color-hover-default: #f3f4f6;
+    --xy-minimap-background-color-default: #f9fafb;
+    --xy-minimap-mask-background-color-default: rgba(0,0,0,0.08);
+    --xy-minimap-node-background-color-default: #d1d5db;
+  }
+
+  /* ReactFlow CSS custom property overrides — dark mode */
+  .dark {
+    --xy-controls-button-background-color-default: #1e293b;
+    --xy-controls-button-color-default: #d1d5db;
+    --xy-controls-button-border-color-default: #475569;
+    --xy-controls-button-background-color-hover-default: #334155;
+    --xy-minimap-background-color-default: #1e293b;
+    --xy-minimap-mask-background-color-default: rgba(0,0,0,0.3);
+    --xy-minimap-node-background-color-default: #475569;
+  }
+
+  /* ReactFlow Controls Styling — fallback for older class-based selectors */
   .react-flow__controls {
     background-color: white;
-    border: 1px solid #ccc;
+    border: 1px solid #d1d5db;
     border-radius: 4px;
   }
 
@@ -94,8 +116,6 @@
   .react-flow__controls button svg {
     width: 16px;
     height: 16px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 1.5;
+    fill: currentColor;
   }
   

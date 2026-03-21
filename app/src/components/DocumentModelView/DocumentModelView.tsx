@@ -30,7 +30,9 @@ function hasTableRelationship(
 }
 import { convertCaseFromSetting } from '@/lib/CaseConverter';
 import { mapSqlTypeToXsd } from '@/lib/TypeMapper';
-import MappingTableCard from './MappingTableCard';
+import MappingTableCard, { type RestorableColumn } from './MappingTableCard';
+import NamespaceManager from './NamespaceManager';
+import type { XmlNamespace } from '@/services/ProjectService';
 
 interface DocumentModelViewProps {
     project: ProjectData;
@@ -77,6 +79,20 @@ function buildTableMapping(
 
 function emptyMapping(): ProjectMapping {
     return { documentModel: { elements: [] } };
+}
+
+/** Build the full list of RestorableColumn for a table mapping from project schema data. */
+function getAvailableColumns(
+    mapping: XmlTableMapping,
+    project: ProjectData,
+): RestorableColumn[] {
+    const namingCase = project.settings?.defaultCasing ?? 'SNAKE';
+    const tableColumns = project.schemas[mapping.sourceSchema]?.tables?.[mapping.sourceTable]?.columns ?? {};
+    return Object.values(tableColumns).map(col => ({
+        name: col.name,
+        xmlName: convertCaseFromSetting(col.name, namingCase),
+        xmlType: mapSqlTypeToXsd(col.type ?? ''),
+    }));
 }
 
 type PopoverStep = 'type' | 'inline-parent';
@@ -214,6 +230,10 @@ export default function DocumentModelView({
             mapping: { ...project.mapping, documentModel: { root: undefined, elements: elements ?? [] } },
         });
     }, [project, elements, onMappingChange]);
+
+    const handleNamespacesChange = useCallback((namespaces: XmlNamespace[]) => {
+        onMappingChange({ ...project, mapping: { ...project.mapping, namespaces } });
+    }, [project, onMappingChange]);
 
     const handleRemoveElement = useCallback((index: number) => {
         const updated = (elements ?? []).filter((_, i) => i !== index);
@@ -452,6 +472,12 @@ export default function DocumentModelView({
 
             {/* Main content */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {/* Namespace manager — always visible in XML mode */}
+                <NamespaceManager
+                    namespaces={mapping.namespaces ?? []}
+                    onChange={handleNamespacesChange}
+                />
+
                 {!hasMapping && (
                     <div className="flex flex-col items-center justify-center h-full gap-3 text-gray-500">
                         <FaFileCode size={32} className="opacity-30" />
@@ -477,6 +503,8 @@ export default function DocumentModelView({
                                     mapping={root}
                                     onChange={handleCardChange}
                                     onRemove={handleRemoveRoot}
+                                    namespaces={mapping.namespaces ?? []}
+                                    availableColumns={getAvailableColumns(root, project)}
                                 />
                             </div>
                         </div>
@@ -506,6 +534,8 @@ export default function DocumentModelView({
                                             onChange={handleCardChange}
                                             onRemove={() => handleRemoveElement(fullIndex)}
                                             parentXmlName={el.mappingType === 'InlineElement' ? resolveParentXmlName(el.parentRef) : undefined}
+                                            namespaces={mapping.namespaces ?? []}
+                                            availableColumns={getAvailableColumns(el, project)}
                                         />
                                     </div>
                                 );
@@ -527,6 +557,8 @@ export default function DocumentModelView({
                                         mapping={el}
                                         onChange={handleCardChange}
                                         onRemove={() => handleRemoveElement(fullIndex)}
+                                        namespaces={mapping.namespaces ?? []}
+                                        availableColumns={getAvailableColumns(el, project)}
                                     />
                                 );
                             })}
